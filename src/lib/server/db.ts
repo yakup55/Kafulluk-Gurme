@@ -131,6 +131,22 @@ CREATE TABLE IF NOT EXISTS stock_moves (
   order_id    text,
   created_at  timestamptz NOT NULL DEFAULT now()
 );
+CREATE TABLE IF NOT EXISTS admin_users (
+  id          serial PRIMARY KEY,
+  username    text NOT NULL UNIQUE CHECK (username ~ '^[a-z0-9._-]{3,32}$'),
+  name        text NOT NULL DEFAULT '',
+  pass_hash   text NOT NULL,
+  role        text NOT NULL DEFAULT 'personel' CHECK (role IN ('yonetici','personel')),
+  active      boolean NOT NULL DEFAULT true,
+  session_ver integer NOT NULL DEFAULT 1,
+  created_at  timestamptz NOT NULL DEFAULT now(),
+  last_login  timestamptz
+);
+
+-- işlemi kimin yaptığı
+ALTER TABLE stock_moves ADD COLUMN IF NOT EXISTS actor text;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS status_by text;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS created_by text;
 CREATE INDEX IF NOT EXISTS stock_moves_pid_idx ON stock_moves (pid, created_at DESC);
 `;
 

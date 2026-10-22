@@ -7,7 +7,7 @@ Gurme kahvaltılık ürünler satan e-ticaret sitesi: vitrin (`/`), satıcı pan
 | Katman | Nerede | Ne yapar |
 | --- | --- | --- |
 | Vitrin | `public/kafulluk.html` (ana sayfada iframe) | Ürünleri ve ayarları `/api/store`'dan okur, kuponu `/api/coupon` ile doğrular, siparişi `/api/orders`'a gönderir |
-| Satıcı paneli | `public/satici.html` | Şifreyle giriş; ürün, stok, sipariş, kupon ve ayar yönetimi (`/api/admin/*`). Yeni siparişleri 20 sn'de bir kontrol eder |
+| Satıcı paneli | `public/satici.html` | Kullanıcı adı + şifreyle giriş, rol bazlı yetki; ürün, stok, sipariş, kupon, ayar ve kullanıcı yönetimi (`/api/admin/*`). Yeni siparişleri 20 sn'de bir kontrol eder |
 | API | `src/routes/api/**` (TanStack Start server routes) | İş kuralları `src/lib/server/store.ts` içinde |
 | Veritabanı | PostgreSQL (`src/lib/server/db.ts`) | Şema ilk istekte otomatik kurulur; ürün tablosu boşsa örnek katalog yüklenir |
 
@@ -17,6 +17,17 @@ Gurme kahvaltılık ürünler satan e-ticaret sitesi: vitrin (`/`), satıcı pan
 - Sipariş iptal edilince stok geri eklenir; iptal geri alınırsa tekrar düşülür. Sipariş silinirse stok iade edilir.
 - Her stok hareketi `stock_moves` tablosuna yazılır (kim, ne zaman, hangi sipariş).
 - Setlerin stoğu ayrı tutulur (set satışı içindeki ürünlerin stoğunu düşmez).
+
+### Panel kullanıcıları ve yetkiler
+| Rol | Yapabilecekleri |
+| --- | --- |
+| **Yönetici** | Her şey: ürün/fiyat, satışa açma-kapama, kupon, ayarlar, yedek, kullanıcı yönetimi, sipariş silme |
+| **Personel** | Siparişleri görür; durum, kargo ve not günceller; telefonla gelen siparişi girer; stok ekler/düşer |
+
+- **İlk giriş:** Kullanıcı adı `admin`, şifre `ADMIN_PASSWORD`. Bu giriş "admin" yönetici hesabını oluşturur; sonra **Şifremi değiştir** ile şifreyi değiştirin. Hesap oluştuktan sonra `ADMIN_PASSWORD` girişte kullanılmaz.
+- Şifreler PBKDF2-SHA256 ile saklanır. Kullanıcı pasife alınınca, rolü ya da şifresi değişince açık oturumları anında kapanır.
+- En az bir aktif yönetici kalmak zorundadır; kimse kendi hesabını silemez ya da yetkisini düşüremez.
+- Stok hareketlerinde (`stock_moves.actor`) ve siparişlerde (`created_by`, `status_by`) işlemi yapan kullanıcı tutulur.
 
 ## Kurulum
 
@@ -33,7 +44,11 @@ Lovable üzerinde yayınlıyorsanız aynı değişkenleri projenin **Secrets** b
 | GET | `/api/store` | Satıştaki ürünler (stokla) + mağaza ayarları |
 | POST | `/api/coupon` | `{ code, sub }` kupon doğrulama |
 | POST | `/api/orders` | Müşteri siparişi |
-| POST | `/api/admin/login` · `/api/admin/logout` | Panel oturumu (HttpOnly çerez) |
+| POST | `/api/admin/login` · `/api/admin/logout` | Panel oturumu (`{ username, password }`, HttpOnly çerez) |
+| GET | `/api/admin/me` | Giriş yapmış kullanıcı ve rolü |
+| POST | `/api/admin/password` | Kendi şifresini değiştir |
+| GET/POST | `/api/admin/users` | Kullanıcıları listele / ekle (yönetici) |
+| PATCH/DELETE | `/api/admin/users/:id` | Rol, aktiflik, şifre belirleme / silme (yönetici) |
 | GET | `/api/admin/data` | Ürünler, siparişler, kuponlar, ayarlar |
 | PUT/PATCH/DELETE | `/api/admin/products/:id` | Ürün kaydet / satışa aç-kapat / sil |
 | POST | `/api/admin/stock/:id` | `{ delta }` stok ekle/çıkar |

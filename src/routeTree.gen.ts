@@ -17,11 +17,15 @@ import { Route as ApiAdminDataRouteImport } from './routes/api/admin/data'
 import { Route as ApiAdminImportRouteImport } from './routes/api/admin/import'
 import { Route as ApiAdminLoginRouteImport } from './routes/api/admin/login'
 import { Route as ApiAdminLogoutRouteImport } from './routes/api/admin/logout'
+import { Route as ApiAdminMeRouteImport } from './routes/api/admin/me'
+import { Route as ApiAdminPasswordRouteImport } from './routes/api/admin/password'
 import { Route as ApiAdminSettingsRouteImport } from './routes/api/admin/settings'
+import { Route as ApiAdminUsersRouteImport } from './routes/api/admin/users'
 import { Route as ApiAdminCouponsCodeRouteImport } from './routes/api/admin/coupons.$code'
 import { Route as ApiAdminOrdersIdRouteImport } from './routes/api/admin/orders.$id'
 import { Route as ApiAdminProductsIdRouteImport } from './routes/api/admin/products.$id'
 import { Route as ApiAdminStockIdRouteImport } from './routes/api/admin/stock.$id'
+import { Route as ApiAdminUsersIdRouteImport } from './routes/api/admin/users.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -63,9 +67,24 @@ const ApiAdminLogoutRoute = ApiAdminLogoutRouteImport.update({
   path: '/api/admin/logout',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminMeRoute = ApiAdminMeRouteImport.update({
+  id: '/api/admin/me',
+  path: '/api/admin/me',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminPasswordRoute = ApiAdminPasswordRouteImport.update({
+  id: '/api/admin/password',
+  path: '/api/admin/password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAdminSettingsRoute = ApiAdminSettingsRouteImport.update({
   id: '/api/admin/settings',
   path: '/api/admin/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminUsersRoute = ApiAdminUsersRouteImport.update({
+  id: '/api/admin/users',
+  path: '/api/admin/users',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAdminCouponsCodeRoute = ApiAdminCouponsCodeRouteImport.update({
@@ -88,6 +107,11 @@ const ApiAdminStockIdRoute = ApiAdminStockIdRouteImport.update({
   path: '/api/admin/stock/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminUsersIdRoute = ApiAdminUsersIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ApiAdminUsersRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -98,11 +122,15 @@ export interface FileRoutesByFullPath {
   '/api/admin/import': typeof ApiAdminImportRoute
   '/api/admin/login': typeof ApiAdminLoginRoute
   '/api/admin/logout': typeof ApiAdminLogoutRoute
+  '/api/admin/me': typeof ApiAdminMeRoute
+  '/api/admin/password': typeof ApiAdminPasswordRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
+  '/api/admin/users': typeof ApiAdminUsersRouteWithChildren
   '/api/admin/coupons/$code': typeof ApiAdminCouponsCodeRoute
   '/api/admin/orders/$id': typeof ApiAdminOrdersIdRoute
   '/api/admin/products/$id': typeof ApiAdminProductsIdRoute
   '/api/admin/stock/$id': typeof ApiAdminStockIdRoute
+  '/api/admin/users/$id': typeof ApiAdminUsersIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -113,11 +141,15 @@ export interface FileRoutesByTo {
   '/api/admin/import': typeof ApiAdminImportRoute
   '/api/admin/login': typeof ApiAdminLoginRoute
   '/api/admin/logout': typeof ApiAdminLogoutRoute
+  '/api/admin/me': typeof ApiAdminMeRoute
+  '/api/admin/password': typeof ApiAdminPasswordRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
+  '/api/admin/users': typeof ApiAdminUsersRouteWithChildren
   '/api/admin/coupons/$code': typeof ApiAdminCouponsCodeRoute
   '/api/admin/orders/$id': typeof ApiAdminOrdersIdRoute
   '/api/admin/products/$id': typeof ApiAdminProductsIdRoute
   '/api/admin/stock/$id': typeof ApiAdminStockIdRoute
+  '/api/admin/users/$id': typeof ApiAdminUsersIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -129,11 +161,15 @@ export interface FileRoutesById {
   '/api/admin/import': typeof ApiAdminImportRoute
   '/api/admin/login': typeof ApiAdminLoginRoute
   '/api/admin/logout': typeof ApiAdminLogoutRoute
+  '/api/admin/me': typeof ApiAdminMeRoute
+  '/api/admin/password': typeof ApiAdminPasswordRoute
   '/api/admin/settings': typeof ApiAdminSettingsRoute
+  '/api/admin/users': typeof ApiAdminUsersRouteWithChildren
   '/api/admin/coupons/$code': typeof ApiAdminCouponsCodeRoute
   '/api/admin/orders/$id': typeof ApiAdminOrdersIdRoute
   '/api/admin/products/$id': typeof ApiAdminProductsIdRoute
   '/api/admin/stock/$id': typeof ApiAdminStockIdRoute
+  '/api/admin/users/$id': typeof ApiAdminUsersIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -146,11 +182,15 @@ export interface FileRouteTypes {
     | '/api/admin/import'
     | '/api/admin/login'
     | '/api/admin/logout'
+    | '/api/admin/me'
+    | '/api/admin/password'
     | '/api/admin/settings'
+    | '/api/admin/users'
     | '/api/admin/coupons/$code'
     | '/api/admin/orders/$id'
     | '/api/admin/products/$id'
     | '/api/admin/stock/$id'
+    | '/api/admin/users/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -161,11 +201,15 @@ export interface FileRouteTypes {
     | '/api/admin/import'
     | '/api/admin/login'
     | '/api/admin/logout'
+    | '/api/admin/me'
+    | '/api/admin/password'
     | '/api/admin/settings'
+    | '/api/admin/users'
     | '/api/admin/coupons/$code'
     | '/api/admin/orders/$id'
     | '/api/admin/products/$id'
     | '/api/admin/stock/$id'
+    | '/api/admin/users/$id'
   id:
     | '__root__'
     | '/'
@@ -176,11 +220,15 @@ export interface FileRouteTypes {
     | '/api/admin/import'
     | '/api/admin/login'
     | '/api/admin/logout'
+    | '/api/admin/me'
+    | '/api/admin/password'
     | '/api/admin/settings'
+    | '/api/admin/users'
     | '/api/admin/coupons/$code'
     | '/api/admin/orders/$id'
     | '/api/admin/products/$id'
     | '/api/admin/stock/$id'
+    | '/api/admin/users/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -192,7 +240,10 @@ export interface RootRouteChildren {
   ApiAdminImportRoute: typeof ApiAdminImportRoute
   ApiAdminLoginRoute: typeof ApiAdminLoginRoute
   ApiAdminLogoutRoute: typeof ApiAdminLogoutRoute
+  ApiAdminMeRoute: typeof ApiAdminMeRoute
+  ApiAdminPasswordRoute: typeof ApiAdminPasswordRoute
   ApiAdminSettingsRoute: typeof ApiAdminSettingsRoute
+  ApiAdminUsersRoute: typeof ApiAdminUsersRouteWithChildren
   ApiAdminCouponsCodeRoute: typeof ApiAdminCouponsCodeRoute
   ApiAdminOrdersIdRoute: typeof ApiAdminOrdersIdRoute
   ApiAdminProductsIdRoute: typeof ApiAdminProductsIdRoute
@@ -257,11 +308,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminLogoutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/me': {
+      id: '/api/admin/me'
+      path: '/api/admin/me'
+      fullPath: '/api/admin/me'
+      preLoaderRoute: typeof ApiAdminMeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/password': {
+      id: '/api/admin/password'
+      path: '/api/admin/password'
+      fullPath: '/api/admin/password'
+      preLoaderRoute: typeof ApiAdminPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/admin/settings': {
       id: '/api/admin/settings'
       path: '/api/admin/settings'
       fullPath: '/api/admin/settings'
       preLoaderRoute: typeof ApiAdminSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/users': {
+      id: '/api/admin/users'
+      path: '/api/admin/users'
+      fullPath: '/api/admin/users'
+      preLoaderRoute: typeof ApiAdminUsersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/admin/coupons/$code': {
@@ -292,8 +364,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminStockIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/users/$id': {
+      id: '/api/admin/users/$id'
+      path: '/$id'
+      fullPath: '/api/admin/users/$id'
+      preLoaderRoute: typeof ApiAdminUsersIdRouteImport
+      parentRoute: typeof ApiAdminUsersRoute
+    }
   }
 }
+
+interface ApiAdminUsersRouteChildren {
+  ApiAdminUsersIdRoute: typeof ApiAdminUsersIdRoute
+}
+
+const ApiAdminUsersRouteChildren: ApiAdminUsersRouteChildren = {
+  ApiAdminUsersIdRoute: ApiAdminUsersIdRoute,
+}
+
+const ApiAdminUsersRouteWithChildren = ApiAdminUsersRoute._addFileChildren(
+  ApiAdminUsersRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -304,7 +395,10 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminImportRoute: ApiAdminImportRoute,
   ApiAdminLoginRoute: ApiAdminLoginRoute,
   ApiAdminLogoutRoute: ApiAdminLogoutRoute,
+  ApiAdminMeRoute: ApiAdminMeRoute,
+  ApiAdminPasswordRoute: ApiAdminPasswordRoute,
   ApiAdminSettingsRoute: ApiAdminSettingsRoute,
+  ApiAdminUsersRoute: ApiAdminUsersRouteWithChildren,
   ApiAdminCouponsCodeRoute: ApiAdminCouponsCodeRoute,
   ApiAdminOrdersIdRoute: ApiAdminOrdersIdRoute,
   ApiAdminProductsIdRoute: ApiAdminProductsIdRoute,

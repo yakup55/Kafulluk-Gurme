@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
-import { admin, json, readJson } from "@/lib/server/http";
+import { json, owner, readJson } from "@/lib/server/http";
 import { importBackup } from "@/lib/server/store";
 
 const rec = z.record(z.string(), z.record(z.string(), z.unknown()));
@@ -12,7 +12,7 @@ const body = z.object({
 export const Route = createFileRoute("/api/admin/import")({
   server: {
     handlers: {
-      POST: admin(async ({ request }) =>
+      POST: owner(async ({ request }) =>
         json(await importBackup(body.parse(await readJson(request)).data)),
       ),
     },

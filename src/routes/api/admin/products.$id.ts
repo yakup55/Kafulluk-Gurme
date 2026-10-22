@@ -1,15 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
-import { admin, json, readJson } from "@/lib/server/http";
+import { json, owner, readJson } from "@/lib/server/http";
 import { deleteProduct, patchProduct, productSchema, putProduct } from "@/lib/server/store";
 
+/** Ürün kaydetme, satışa açma/kapama ve silme yalnızca yöneticide */
 export const Route = createFileRoute("/api/admin/products/$id")({
   server: {
     handlers: {
-      PUT: admin(async ({ request, params }) =>
-        json(await putProduct(params.id, productSchema.parse(await readJson(request)))),
+      PUT: owner(async ({ request, params, user }) =>
+        json(
+          await putProduct(params.id, productSchema.parse(await readJson(request)), user.username),
+        ),
       ),
-      PATCH: admin(async ({ request, params }) =>
+      PATCH: owner(async ({ request, params }) =>
         json(
           await patchProduct(
             params.id,
@@ -17,7 +20,7 @@ export const Route = createFileRoute("/api/admin/products/$id")({
           ),
         ),
       ),
-      DELETE: admin(async ({ params }) => json(await deleteProduct(params.id))),
+      DELETE: owner(async ({ params }) => json(await deleteProduct(params.id))),
     },
   },
 });

@@ -1,7 +1,55 @@
 import { HttpError } from "./db";
-import { isAdmin } from "./auth";
+import { currentUser, type AdminUser, type Role } from "./auth";
 
 type Params = { id: string; code: string };
+
+/* ---------- doğrulama hatalarını Türkçe ve anlaşılır göster ---------- */
+type ZodIssueLike = {
+  path: (string | number)[];
+  message: string;
+  code?: string;
+  minimum?: number | bigint;
+  maximum?: number | bigint;
+  type?: string;
+};
+const FIELD: Record<string, string> = {
+  name: "Ad",
+  username: "Kullanıcı adı",
+  password: "Şifre",
+  next: "Yeni şifre",
+  current: "Mevcut şifre",
+  phone: "Telefon",
+  email: "E-posta",
+  city: "İl",
+  dist: "İlçe",
+  addr: "Açık adres",
+  note: "Not",
+  price: "Fiyat",
+  stock: "Stok",
+  cat: "Kategori",
+  pct: "İndirim oranı",
+  items: "Ürünler",
+  qty: "Adet",
+  role: "Rol",
+  code: "Kupon kodu",
+};
+function zodMessage(i: ZodIssueLike | undefined) {
+  if (!i) return "Geçersiz veri.";
+  const key = [...i.path].reverse().find((p) => typeof p === "string") as string | undefined;
+  const f = (key && FIELD[key]) || "Bir alan";
+  // şemada Türkçe mesaj yazdıysak onu kullan
+  if (i.message && /[çğıöşüÇĞİÖŞÜ]|en az|geçersiz|gerekli/.test(i.message))
+    return `${f}: ${i.message}`;
+  if (i.code === "too_small")
+    return i.type === "string" ? `${f} en az ${i.minimum} karakter olmalı.` : `${f} çok küçük.`;
+  if (i.code === "too_big")
+    return i.type === "string"
+      ? `${f} en fazla ${i.maximum} karakter olabilir.`
+      : `${f} çok büyük.`;
+  if (i.code === "invalid_string") return `${f} geçersiz.`;
+  if (i.code === "invalid_type") return `${f} eksik ya da hatalı.`;
+  return `${f} geçersiz.`;
+}
 
 export function json(data: unknown, status = 200, headers: Record<string, string> = {}) {
   return new Response(JSON.stringify(data), {
@@ -33,12 +81,8 @@ export function handle(fn: (ctx: { request: Request; params: Params }) => Promis
       if (e instanceof HttpError)
         return json({ ok: false, error: e.message, ...e.extra }, e.status);
       if (e && typeof e === "object" && "issues" in e) {
-        // zod doğrulama hatası
-        const issue = (e as { issues: { path: (string | number)[]; message: string }[] }).issues[0];
-        return json(
-          { ok: false, error: "Geçersiz veri: " + issue?.path.join(".") + " " + issue?.message },
-          400,
-        );
+        const issue = (e as { issues: ZodIssueLike[] }).issues[0];
+        return json({ ok: false, error: zodMessage(issue) }, 400);
       }
       console.error(e);
       return json({ ok: false, error: "Sunucu hatası. Birazdan tekrar deneyin." }, 500);
@@ -47,10 +91,14 @@ export function handle(fn: (ctx: { request: Request; params: Params }) => Promis
 }
 
 /**
- * Satıcı uçları: oturum çerezi + (yazma işlemlerinde) aynı köken kontrolü.
- * Çerez SameSite=Strict olduğu için CSRF'e karşı ikinci bir katman.
+ * Satıcı uçları: oturum çerezi + rol kontrolü + (yazma işlemlerinde) aynı köken kontrolü.
+ * Çerez SameSite=Strict olduğu için köken kontrolü CSRF'e karşı ikinci bir katman.
+ * role verilmezse her giriş yapmış kullanıcı (yönetici ve personel) erişebilir.
  */
-export function admin(fn: (ctx: { request: Request; params: Params }) => Promise<Response>) {
+export function admin(
+  fn: (ctx: { request: Request; params: Params; user: AdminUser }) => Promise<Response>,
+  opts: { role?: Role } = {},
+) {
   return handle(async (ctx) => {
     const { request } = ctx;
     if (request.method !== "GET") {
@@ -59,7 +107,14 @@ export function admin(fn: (ctx: { request: Request; params: Params }) => Promise
         throw new HttpError(403, "Geçersiz istek kaynağı.");
       }
     }
-    if (!(await isAdmin(request))) throw new HttpError(401, "Oturum açmanız gerekiyor.");
-    return fn(ctx);
+    const user = await currentUser(request);
+    if (!user) throw new HttpError(401, "Oturum açmanız gerekiyor.");
+    if (opts.role === "yonetici" && user.role !== "yonetici") {
+      throw new HttpError(403, "Bu işlem için yönetici yetkisi gerekiyor.");
+    }
+    return fn({ ...ctx, user });
   });
 }
+
+/** Yalnızca yöneticinin yapabileceği işlemler */
+export const owner = (fn: Parameters<typeof admin>[0]) => admin(fn, { role: "yonetici" });

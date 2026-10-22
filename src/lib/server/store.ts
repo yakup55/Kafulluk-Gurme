@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { hashPassword, verifyPassword } from "./auth";
 import { db, HttpError, transaction, type Sql, type Tx } from "./db";
 
 /* ================= ortak tipler ve dönüştürücüler ================= */
@@ -83,6 +84,8 @@ type OrderRow = {
   stock_applied: boolean;
   source: string;
   sample: boolean;
+  status_by: string | null;
+  created_by: string | null;
   items: { pid: string | null; name: string; w: string; price: number; qty: number }[];
 };
 
@@ -108,6 +111,8 @@ function orderOut(r: OrderRow) {
     stockApplied: r.stock_applied,
     source: r.source,
     sample: r.sample,
+    statusBy: r.status_by,
+    createdBy: r.created_by,
   };
 }
 
@@ -139,6 +144,7 @@ async function takeStock(
   reason: string,
   orderId: string | null,
   requireActive: boolean,
+  actor: string | null = null,
 ) {
   const need = new Map<string, number>();
   for (const l of lines) if (l.pid) need.set(l.pid, (need.get(l.pid) ?? 0) + l.qty);
@@ -162,12 +168,18 @@ async function takeStock(
         { code: "stock", pid, stock: p.stock },
       );
     }
-    await tx`INSERT INTO stock_moves (pid, delta, reason, order_id) VALUES (${pid}, ${-qty}, ${reason}, ${orderId})`;
+    await tx`INSERT INTO stock_moves (pid, delta, reason, order_id, actor) VALUES (${pid}, ${-qty}, ${reason}, ${orderId}, ${actor})`;
   }
 }
 
 /** Stoğu geri ekler (iptal / silme). Silinmiş ürünler atlanır. */
-async function returnStock(tx: Tx, lines: Line[], reason: string, orderId: string | null) {
+async function returnStock(
+  tx: Tx,
+  lines: Line[],
+  reason: string,
+  orderId: string | null,
+  actor: string | null = null,
+) {
   const back = new Map<string, number>();
   for (const l of lines) if (l.pid) back.set(l.pid, (back.get(l.pid) ?? 0) + l.qty);
   for (const pid of [...back.keys()].sort()) {
@@ -175,7 +187,7 @@ async function returnStock(tx: Tx, lines: Line[], reason: string, orderId: strin
     const upd =
       await tx`UPDATE products SET stock = stock + ${qty}, updated_at = now() WHERE id = ${pid} RETURNING id`;
     if (upd.length)
-      await tx`INSERT INTO stock_moves (pid, delta, reason, order_id) VALUES (${pid}, ${qty}, ${reason}, ${orderId})`;
+      await tx`INSERT INTO stock_moves (pid, delta, reason, order_id, actor) VALUES (${pid}, ${qty}, ${reason}, ${orderId}, ${actor})`;
   }
 }
 
@@ -406,7 +418,7 @@ export const productSchema = z.object({
 });
 const productId = z.string().regex(/^[a-z0-9-]{1,80}$/, "geçersiz ürün kodu");
 
-export async function putProduct(id: string, data: z.infer<typeof productSchema>) {
+export async function putProduct(id: string, data: z.infer<typeof productSchema>, actor: string) {
   productId.parse(id);
   const sql = await db();
   return transaction(sql, async (tx) => {
@@ -426,7 +438,7 @@ export async function putProduct(id: string, data: z.infer<typeof productSchema>
         active = EXCLUDED.active, sort = COALESCE(${data.sort ?? null}::bigint, products.sort), updated_at = now()`;
     const delta = data.stock - (prev?.stock ?? 0);
     if (delta)
-      await tx`INSERT INTO stock_moves (pid, delta, reason) VALUES (${id}, ${delta}, 'panel-duzenleme')`;
+      await tx`INSERT INTO stock_moves (pid, delta, reason, actor) VALUES (${id}, ${delta}, 'panel-duzenleme', ${actor})`;
     return { ok: true };
   });
 }
@@ -446,13 +458,13 @@ export async function deleteProduct(id: string) {
 }
 
 /** Panelden +/- stok: istemcinin gördüğü değere değil, veritabanındaki güncel değere göre çalışır. */
-export async function adjustStock(id: string, delta: number) {
+export async function adjustStock(id: string, delta: number, actor: string) {
   const sql = await db();
   return transaction(sql, async (tx) => {
     const r = await tx<{ stock: number }[]>`
       UPDATE products SET stock = GREATEST(0, stock + ${delta}), updated_at = now() WHERE id = ${id} RETURNING stock`;
     if (!r.length) throw new HttpError(404, "Ürün bulunamadı.");
-    await tx`INSERT INTO stock_moves (pid, delta, reason) VALUES (${id}, ${delta}, 'panel-stok')`;
+    await tx`INSERT INTO stock_moves (pid, delta, reason, actor) VALUES (${id}, ${delta}, 'panel-stok', ${actor})`;
     return { ok: true, stock: r[0]!.stock };
   });
 }
@@ -495,7 +507,11 @@ export const adminOrderSchema = z.object({
 });
 
 /** Telefon/WhatsApp siparişini panelden kaydet. */
-export async function createAdminOrder(id: string, o: z.infer<typeof adminOrderSchema>) {
+export async function createAdminOrder(
+  id: string,
+  o: z.infer<typeof adminOrderSchema>,
+  actor: string,
+) {
   const sql = await db();
   return transaction(sql, async (tx) => {
     const items = o.items.map((i) => ({
@@ -509,7 +525,7 @@ export async function createAdminOrder(id: string, o: z.infer<typeof adminOrderS
     const disc = Math.min(o.disc, sub);
     const total = round2(sub - disc + o.ship + o.fee);
     const applyStock = o.stockApplied && !o.sample && o.status !== "iptal";
-    if (applyStock) await takeStock(tx, items, "panel-siparis", id, false);
+    if (applyStock) await takeStock(tx, items, "panel-siparis", id, false, actor);
     const no = await insertOrder(tx, {
       id,
       no: o.no || undefined,
@@ -534,6 +550,7 @@ export async function createAdminOrder(id: string, o: z.infer<typeof adminOrderS
         throw new HttpError(409, "Bu sipariş numarası zaten kayıtlı.");
       throw e;
     });
+    await tx`UPDATE orders SET created_by = ${actor} WHERE id = ${id}`;
     return { ok: true, no };
   });
 }
@@ -545,7 +562,7 @@ export const orderPatchSchema = z.object({
 });
 
 /** Durum değişikliği: iptal edilince stok geri eklenir, iptalden geri alınınca tekrar düşülür. */
-export async function patchOrder(id: string, p: z.infer<typeof orderPatchSchema>) {
+export async function patchOrder(id: string, p: z.infer<typeof orderPatchSchema>, actor: string) {
   const sql = await db();
   return transaction(sql, async (tx) => {
     const o = (
@@ -556,13 +573,13 @@ export async function patchOrder(id: string, p: z.infer<typeof orderPatchSchema>
     let stockApplied = o.stock_applied;
     if (p.status && p.status !== o.status) {
       if (p.status === "iptal" && o.stock_applied) {
-        await returnStock(tx, await orderLines(tx, id), "iptal", id);
+        await returnStock(tx, await orderLines(tx, id), "iptal", id, actor);
         stockApplied = false;
       } else if (o.status === "iptal" && !o.stock_applied && !o.sample) {
-        await takeStock(tx, await orderLines(tx, id), "iptal-geri-alindi", id, false);
+        await takeStock(tx, await orderLines(tx, id), "iptal-geri-alindi", id, false, actor);
         stockApplied = true;
       }
-      await tx`UPDATE orders SET status = ${p.status}, status_at = now(), stock_applied = ${stockApplied} WHERE id = ${id}`;
+      await tx`UPDATE orders SET status = ${p.status}, status_at = now(), stock_applied = ${stockApplied}, status_by = ${actor} WHERE id = ${id}`;
     }
     if (p.cargo) await tx`UPDATE orders SET cargo = ${tx.json(p.cargo)} WHERE id = ${id}`;
     if (p.note !== undefined) await tx`UPDATE orders SET note = ${p.note} WHERE id = ${id}`;
@@ -570,7 +587,7 @@ export async function patchOrder(id: string, p: z.infer<typeof orderPatchSchema>
   });
 }
 
-export async function deleteOrder(id: string) {
+export async function deleteOrder(id: string, actor: string) {
   const sql = await db();
   return transaction(sql, async (tx) => {
     const o = (
@@ -579,7 +596,8 @@ export async function deleteOrder(id: string) {
       >`SELECT stock_applied FROM orders WHERE id = ${id} FOR UPDATE`
     )[0];
     if (!o) return { ok: true };
-    if (o.stock_applied) await returnStock(tx, await orderLines(tx, id), "siparis-silindi", id);
+    if (o.stock_applied)
+      await returnStock(tx, await orderLines(tx, id), "siparis-silindi", id, actor);
     await tx`DELETE FROM orders WHERE id = ${id}`;
     return { ok: true };
   });
@@ -695,4 +713,130 @@ export async function importBackup(data: {
                      ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`;
     return { ok: true };
   });
+}
+
+/* ================= KULLANICILAR ================= */
+
+export const ROLES = ["yonetici", "personel"] as const;
+const username = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .regex(
+    /^[a-z0-9._-]{3,32}$/,
+    "3-32 karakter olmalı; yalnızca harf, rakam ve . _ - kullanılabilir",
+  );
+
+export const newUserSchema = z.object({
+  username,
+  name: z.string().trim().min(2).max(60),
+  role: z.enum(ROLES),
+  password: z.string().min(8, "şifre en az 8 karakter").max(200),
+});
+export const userPatchSchema = z.object({
+  name: z.string().trim().min(2).max(60).optional(),
+  role: z.enum(ROLES).optional(),
+  active: z.boolean().optional(),
+  password: z.string().min(8, "şifre en az 8 karakter").max(200).optional(),
+});
+
+type UserListRow = {
+  id: number;
+  username: string;
+  name: string;
+  role: string;
+  active: boolean;
+  created_at: Date;
+  last_login: Date | null;
+};
+
+export async function listUsers() {
+  const sql = await db();
+  const rows = await sql<UserListRow[]>`
+    SELECT id, username, name, role, active, created_at, last_login FROM admin_users ORDER BY role, username`;
+  return rows.map((r) => ({
+    id: r.id,
+    username: r.username,
+    name: r.name,
+    role: r.role,
+    active: r.active,
+    createdAt: r.created_at.getTime(),
+    lastLogin: r.last_login ? r.last_login.getTime() : null,
+  }));
+}
+
+export async function createUser(u: z.infer<typeof newUserSchema>) {
+  const sql = await db();
+  const r = await sql`
+    INSERT INTO admin_users (username, name, pass_hash, role)
+    VALUES (${u.username}, ${u.name}, ${await hashPassword(u.password)}, ${u.role})
+    ON CONFLICT (username) DO NOTHING RETURNING id`;
+  if (!r.length) throw new HttpError(409, "Bu kullanıcı adı zaten kullanılıyor.");
+  return { ok: true };
+}
+
+/** Son aktif yöneticinin yetkisini alma / pasife alma / silme engellenir. */
+async function assertKeepsOwner(tx: Tx, id: number) {
+  const [{ n } = { n: 0 }] = await tx<{ n: number }[]>`
+    SELECT count(*)::int AS n FROM admin_users WHERE role = 'yonetici' AND active AND id <> ${id}`;
+  if (n === 0) throw new HttpError(409, "En az bir aktif yönetici kalmalı.");
+}
+
+export async function updateUser(
+  id: number,
+  p: z.infer<typeof userPatchSchema>,
+  me: { id: number },
+) {
+  const sql = await db();
+  return transaction(sql, async (tx) => {
+    const u = (
+      await tx<{ role: string; active: boolean }[]>`
+      SELECT role, active FROM admin_users WHERE id = ${id} FOR UPDATE`
+    )[0];
+    if (!u) throw new HttpError(404, "Kullanıcı bulunamadı.");
+    if (id === me.id && (p.active === false || p.role === "personel"))
+      throw new HttpError(409, "Kendi hesabınızı pasife alamaz ya da yetkinizi düşüremezsiniz.");
+    const losesOwner =
+      u.role === "yonetici" && u.active && (p.active === false || p.role === "personel");
+    if (losesOwner) await assertKeepsOwner(tx, id);
+    if (p.name !== undefined) await tx`UPDATE admin_users SET name = ${p.name} WHERE id = ${id}`;
+    if (p.role !== undefined) await tx`UPDATE admin_users SET role = ${p.role} WHERE id = ${id}`;
+    if (p.active !== undefined)
+      await tx`UPDATE admin_users SET active = ${p.active} WHERE id = ${id}`;
+    if (p.password !== undefined)
+      await tx`UPDATE admin_users SET pass_hash = ${await hashPassword(p.password)} WHERE id = ${id}`;
+    // Yetki, durum ya da şifre değiştiyse açık oturumlar kapanır
+    if (p.role !== undefined || p.active === false || p.password !== undefined)
+      await tx`UPDATE admin_users SET session_ver = session_ver + 1 WHERE id = ${id}`;
+    return { ok: true };
+  });
+}
+
+export async function deleteUser(id: number, me: { id: number }) {
+  if (id === me.id) throw new HttpError(409, "Kendi hesabınızı silemezsiniz.");
+  const sql = await db();
+  return transaction(sql, async (tx) => {
+    const u = (
+      await tx<{ role: string; active: boolean }[]>`
+      SELECT role, active FROM admin_users WHERE id = ${id} FOR UPDATE`
+    )[0];
+    if (!u) return { ok: true };
+    if (u.role === "yonetici" && u.active) await assertKeepsOwner(tx, id);
+    await tx`DELETE FROM admin_users WHERE id = ${id}`;
+    return { ok: true };
+  });
+}
+
+/** Kullanıcının kendi şifresini değiştirmesi (mevcut şifre gerekir). Yeni oturum bilgisi döner. */
+export async function changeOwnPassword(id: number, current: string, next: string) {
+  const sql = await db();
+  const u = (
+    await sql<{ pass_hash: string }[]>`SELECT pass_hash FROM admin_users WHERE id = ${id}`
+  )[0];
+  if (!u || !(await verifyPassword(current, u.pass_hash)))
+    throw new HttpError(422, "Mevcut şifre hatalı.");
+  const r = await sql<{ id: number; session_ver: number }[]>`
+    UPDATE admin_users SET pass_hash = ${await hashPassword(next)}, session_ver = session_ver + 1
+    WHERE id = ${id} RETURNING id, session_ver`;
+  return r[0]!;
 }
