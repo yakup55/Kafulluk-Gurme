@@ -16,11 +16,38 @@ export const DEFAULT_SETTINGS = {
   ship: 59.9,
   fast: 99.9,
   cod: 19.9,
+  /** kargo ve kapıda ödeme bedelinin KDV oranı (%) */
+  shipVat: 20,
   lowStock: 5,
 };
 export type Settings = typeof DEFAULT_SETTINGS;
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
+
+/* ================= KDV ================= */
+export const VAT_RATES = [0, 1, 10, 20] as const;
+/** KDV hariç fiyattan KDV dahil fiyat */
+export const grossOf = (net: number, vat: number) => round2(net * (1 + vat / 100));
+/** KDV dahil fiyattan KDV hariç fiyat */
+export const netOf = (gross: number, vat: number) => round2(gross / (1 + vat / 100));
+/** KDV dahil bir tutarın içindeki KDV */
+const vatIn = (gross: number, vat: number) => gross - gross / (1 + vat / 100);
+/**
+ * Siparişin toplam KDV'si: satırlar kendi oranlarıyla, kupon indirimi satırlara orantılı
+ * dağıtılır; kargo ve kapıda ödeme bedeli shipVat oranıyla.
+ */
+export function orderVat(
+  items: { price: number; qty: number; vat: number }[],
+  sub: number,
+  disc: number,
+  extras: number,
+  shipVat: number,
+) {
+  const k = sub > 0 ? (sub - disc) / sub : 1;
+  const v =
+    items.reduce((a, i) => a + vatIn(i.price * i.qty * k, i.vat), 0) + vatIn(extras, shipVat);
+  return round2(v);
+}
 
 type ProductRow = {
   id: string;
@@ -40,6 +67,8 @@ type ProductRow = {
   stock: number;
   active: boolean;
   sort: number;
+  vat: number;
+  net_price: number | null;
 };
 
 function productOut(r: ProductRow) {
@@ -61,6 +90,9 @@ function productOut(r: ProductRow) {
     stock: r.stock,
     active: r.active,
     sort: r.sort,
+    vat: r.vat,
+    net: r.net_price ?? netOf(r.price, r.vat),
+    oldNet: r.old ? netOf(r.old, r.vat) : 0,
   };
 }
 
@@ -86,7 +118,8 @@ type OrderRow = {
   sample: boolean;
   status_by: string | null;
   created_by: string | null;
-  items: { pid: string | null; name: string; w: string; price: number; qty: number }[];
+  vat_total: number;
+  items: { pid: string | null; name: string; w: string; price: number; qty: number; vat: number }[];
 };
 
 function orderOut(r: OrderRow) {
@@ -113,6 +146,7 @@ function orderOut(r: OrderRow) {
     sample: r.sample,
     statusBy: r.status_by,
     createdBy: r.created_by,
+    vatTotal: r.vat_total,
   };
 }
 
@@ -129,7 +163,7 @@ async function getSettings(sql: Sql): Promise<Settings> {
 
 const ORDER_SELECT = (where: string) => `
   SELECT o.*, COALESCE(
-    (SELECT json_agg(json_build_object('pid', i.pid, 'name', i.name, 'w', i.w, 'price', i.price::float8, 'qty', i.qty) ORDER BY i.line)
+    (SELECT json_agg(json_build_object('pid', i.pid, 'name', i.name, 'w', i.w, 'price', i.price::float8, 'qty', i.qty, 'vat', i.vat) ORDER BY i.line)
        FROM order_items i WHERE i.order_id = o.id), '[]') AS items
   FROM orders o ${where}`;
 
@@ -203,7 +237,15 @@ async function insertOrder(
     createdAt?: number | undefined;
     status?: string | undefined;
     customer: Record<string, string>;
-    items: { pid: string | null; name: string; w: string; price: number; qty: number }[];
+    items: {
+      pid: string | null;
+      name: string;
+      w: string;
+      price: number;
+      qty: number;
+      vat: number;
+    }[];
+    vatTotal: number;
     sub: number;
     disc: number;
     ship: number;
@@ -223,14 +265,14 @@ async function insertOrder(
   const created = o.createdAt ? new Date(o.createdAt) : new Date();
   await tx`
     INSERT INTO orders (id, no, created_at, status, status_at, customer, sub, disc, ship, fee, total, pay, dlv,
-                        coupon, cargo, note, stock_applied, source, sample)
+                        coupon, cargo, note, stock_applied, source, sample, vat_total)
     VALUES (${o.id}, ${no}, ${created}, ${o.status ?? "yeni"}, now(), ${tx.json(o.customer)}, ${o.sub}, ${o.disc},
             ${o.ship}, ${o.fee}, ${o.total}, ${o.pay}, ${o.dlv}, ${o.coupon ?? null},
-            ${tx.json(o.cargo ?? { firm: "", track: "" })}, ${o.note ?? ""}, ${o.stockApplied}, ${o.source}, ${!!o.sample})`;
+            ${tx.json(o.cargo ?? { firm: "", track: "" })}, ${o.note ?? ""}, ${o.stockApplied}, ${o.source}, ${!!o.sample}, ${o.vatTotal})`;
   let line = 0;
   for (const it of o.items) {
-    await tx`INSERT INTO order_items (order_id, line, pid, name, w, price, qty)
-             VALUES (${o.id}, ${line++}, ${it.pid}, ${it.name}, ${it.w}, ${it.price}, ${it.qty})`;
+    await tx`INSERT INTO order_items (order_id, line, pid, name, w, price, qty, vat)
+             VALUES (${o.id}, ${line++}, ${it.pid}, ${it.name}, ${it.w}, ${it.price}, ${it.qty}, ${it.vat})`;
   }
   return no;
 }
@@ -311,7 +353,7 @@ export async function placeWebOrder(input: z.infer<typeof webOrderSchema>) {
           "Sepetteki bir ürün artık satışta değil. Sepetinizi kontrol edin.",
           { code: "gone", pid: id },
         );
-      return { pid: p.id, name: p.name, w: p.w, price: p.price, qty: qty.get(id)! };
+      return { pid: p.id, name: p.name, w: p.w, price: p.price, qty: qty.get(id)!, vat: p.vat };
     });
 
     const sub = round2(items.reduce((a, i) => a + i.price * i.qty, 0));
@@ -332,6 +374,7 @@ export async function placeWebOrder(input: z.infer<typeof webOrderSchema>) {
     const ship = input.dlv === "fast" ? +s.fast : after >= +s.freeAt ? 0 : +s.ship;
     const fee = input.pay === "cod" ? +s.cod : 0;
     const total = round2(after + ship + fee);
+    const vatTotal = orderVat(items, sub, disc, ship + fee, +s.shipVat);
 
     if (input.expectedTotal != null && Math.abs(input.expectedTotal - total) > 0.009) {
       throw new HttpError(
@@ -350,6 +393,7 @@ export async function placeWebOrder(input: z.infer<typeof webOrderSchema>) {
       id,
       customer: input.customer,
       items,
+      vatTotal,
       sub,
       disc,
       ship,
@@ -369,6 +413,7 @@ export async function placeWebOrder(input: z.infer<typeof webOrderSchema>) {
       ship,
       fee,
       total,
+      vatTotal,
       pay: input.pay,
       dlv: input.dlv,
       iban: s.iban,
@@ -386,9 +431,11 @@ export async function adminData() {
     sql.unsafe<OrderRow[]>(ORDER_SELECT("ORDER BY o.created_at DESC LIMIT 2000")),
     sql`SELECT code, pct, min, active FROM coupons ORDER BY code`,
     sql<{ value: Partial<Settings> }[]>`SELECT value FROM settings WHERE key = 'store'`,
-    sql<
-      QuestionRow[]
-    >`SELECT * FROM questions ORDER BY (answer = '') DESC, created_at DESC LIMIT 1000`,
+    sql<QuestionRow[]>`
+      SELECT q.*, COALESCE((SELECT json_agg(json_build_object('from', m.sender, 'body', m.body, 'author', m.author,
+                                     'at', (extract(epoch FROM m.created_at) * 1000)::bigint) ORDER BY m.created_at)
+                            FROM question_messages m WHERE m.question_id = q.id), '[]') AS messages
+      FROM questions q ORDER BY (q.last_from = 'musteri') DESC, q.last_at DESC LIMIT 1000`,
   ]);
   return {
     products: products.map(productOut),
@@ -404,8 +451,15 @@ export const productSchema = z.object({
   name: z.string().trim().min(2).max(120),
   cat: z.string().trim().min(1).max(60),
   w: z.string().trim().max(40).default(""),
-  price: z.number().positive().max(1_000_000),
-  old: z.number().min(0).max(1_000_000).default(0),
+  /** KDV hariç satış fiyatı (satıcının girdiği) */
+  net: z.number().positive().max(1_000_000).optional(),
+  /** KDV oranı (%) */
+  vat: z.union([z.literal(0), z.literal(1), z.literal(10), z.literal(20)]).default(1),
+  /** KDV hariç indirim öncesi fiyat (isteğe bağlı) */
+  oldNet: z.number().min(0).max(1_000_000).default(0),
+  /** eski yedeklerle uyum: KDV dahil fiyat verilirse KDV hariç fiyat bundan hesaplanır */
+  price: z.number().positive().max(1_000_000).optional(),
+  old: z.number().min(0).max(1_000_000).optional(),
   stock: z.number().int().min(0).max(1_000_000),
   origin: z.string().trim().max(60).default(""),
   desc: z.string().trim().max(1000).default(""),
@@ -422,6 +476,15 @@ export const productSchema = z.object({
 });
 const productId = z.string().regex(/^[a-z0-9-]{1,80}$/, "geçersiz ürün kodu");
 
+/** KDV hariç fiyat + oran → saklanacak KDV hariç / KDV dahil fiyatlar */
+function pricing(d: z.infer<typeof productSchema>) {
+  const net = d.net ?? (d.price != null ? netOf(d.price, d.vat) : NaN);
+  if (!(net > 0)) throw new HttpError(400, "Fiyat: KDV hariç fiyatı girin.");
+  const price = grossOf(net, d.vat);
+  const oldGross = d.oldNet ? grossOf(d.oldNet, d.vat) : (d.old ?? 0);
+  return { net, price, old: oldGross > price ? oldGross : 0 };
+}
+
 export async function putProduct(id: string, data: z.infer<typeof productSchema>, actor: string) {
   productId.parse(id);
   const sql = await db();
@@ -430,12 +493,13 @@ export async function putProduct(id: string, data: z.infer<typeof productSchema>
       await tx<{ stock: number }[]>`SELECT stock FROM products WHERE id = ${id} FOR UPDATE`
     )[0];
     const sort = data.sort ?? Date.now();
+    const { net, price, old } = pricing(data);
     await tx`
-      INSERT INTO products (id, cat, name, w, price, old, type, c1, c2, origin, descr, store, img, inc, stock, active, sort)
-      VALUES (${id}, ${data.cat}, ${data.name}, ${data.w}, ${data.price}, ${data.old > data.price ? data.old : 0},
+      INSERT INTO products (id, cat, name, w, price, old, type, c1, c2, origin, descr, store, img, inc, stock, active, sort, vat, net_price)
+      VALUES (${id}, ${data.cat}, ${data.name}, ${data.w}, ${price}, ${old},
               ${data.type}, ${data.c1}, ${data.c2}, ${data.origin}, ${data.desc}, ${data.store}, ${data.img},
-              ${data.inc && data.inc.length ? data.inc : null}, ${data.stock}, ${data.active}, ${sort})
-      ON CONFLICT (id) DO UPDATE SET
+              ${data.inc && data.inc.length ? data.inc : null}, ${data.stock}, ${data.active}, ${sort}, ${data.vat}, ${net})
+      ON CONFLICT (id) DO UPDATE SET vat = EXCLUDED.vat, net_price = EXCLUDED.net_price,
         cat = EXCLUDED.cat, name = EXCLUDED.name, w = EXCLUDED.w, price = EXCLUDED.price, old = EXCLUDED.old,
         type = EXCLUDED.type, c1 = EXCLUDED.c1, c2 = EXCLUDED.c2, origin = EXCLUDED.origin, descr = EXCLUDED.descr,
         store = EXCLUDED.store, img = EXCLUDED.img, inc = EXCLUDED.inc, stock = EXCLUDED.stock,
@@ -518,16 +582,28 @@ export async function createAdminOrder(
 ) {
   const sql = await db();
   return transaction(sql, async (tx) => {
+    const pids = o.items.map((i) => i.pid).filter((x): x is string => !!x);
+    const rates = new Map(
+      (pids.length
+        ? await tx<
+            { id: string; vat: number }[]
+          >`SELECT id, vat FROM products WHERE id IN ${tx(pids)}`
+        : []
+      ).map((r) => [r.id, r.vat]),
+    );
     const items = o.items.map((i) => ({
       pid: i.pid ?? null,
       name: i.name,
       w: i.w,
       price: i.price,
       qty: i.qty,
+      vat: i.pid ? (rates.get(i.pid) ?? 1) : 1,
     }));
     const sub = round2(items.reduce((a, i) => a + i.price * i.qty, 0));
     const disc = Math.min(o.disc, sub);
     const total = round2(sub - disc + o.ship + o.fee);
+    const sset = await getSettings(tx);
+    const vatTotal = orderVat(items, sub, disc, o.ship + o.fee, +sset.shipVat);
     const applyStock = o.stockApplied && !o.sample && o.status !== "iptal";
     if (applyStock) await takeStock(tx, items, "panel-siparis", id, false, actor);
     const no = await insertOrder(tx, {
@@ -537,6 +613,7 @@ export async function createAdminOrder(
       status: o.status,
       customer: o.customer,
       items,
+      vatTotal,
       sub,
       disc,
       ship: o.ship,
@@ -647,6 +724,7 @@ export const settingsSchema = z.object({
   ship: z.number().min(0),
   fast: z.number().min(0),
   cod: z.number().min(0),
+  shipVat: z.union([z.literal(0), z.literal(1), z.literal(10), z.literal(20)]).default(20),
   lowStock: z.number().int().min(0),
 });
 export async function putSettings(s: z.infer<typeof settingsSchema>) {
@@ -671,19 +749,29 @@ export async function importBackup(data: {
     await tx`DELETE FROM coupons`;
     for (const [id, raw] of Object.entries(data.products)) {
       const p = productSchema.parse(raw);
-      await tx`INSERT INTO products (id, cat, name, w, price, old, type, c1, c2, origin, descr, store, img, inc, stock, active, sort)
-        VALUES (${productId.parse(id)}, ${p.cat}, ${p.name}, ${p.w}, ${p.price}, ${p.old}, ${p.type}, ${p.c1}, ${p.c2},
-                ${p.origin}, ${p.desc}, ${p.store}, ${p.img}, ${p.inc && p.inc.length ? p.inc : null}, ${p.stock}, ${p.active}, ${p.sort ?? 0})`;
+      const pr = pricing(p);
+      await tx`INSERT INTO products (id, cat, name, w, price, old, type, c1, c2, origin, descr, store, img, inc, stock, active, sort, vat, net_price)
+        VALUES (${productId.parse(id)}, ${p.cat}, ${p.name}, ${p.w}, ${pr.price}, ${pr.old}, ${p.type}, ${p.c1}, ${p.c2},
+                ${p.origin}, ${p.desc}, ${p.store}, ${p.img}, ${p.inc && p.inc.length ? p.inc : null}, ${p.stock}, ${p.active}, ${p.sort ?? 0},
+                ${p.vat}, ${pr.net})`;
     }
     for (const [id, raw] of Object.entries(data.orders)) {
       const o = adminOrderSchema.parse(raw);
-      const r = raw as { sub?: number; total?: number; statusAt?: number; stockApplied?: boolean };
-      const items = o.items.map((i) => ({
+      const r = raw as {
+        sub?: number;
+        total?: number;
+        statusAt?: number;
+        stockApplied?: boolean;
+        vatTotal?: number;
+        items?: { vat?: number }[];
+      };
+      const items = o.items.map((i, n) => ({
         pid: i.pid ?? null,
         name: i.name,
         w: i.w,
         price: i.price,
         qty: i.qty,
+        vat: r.items?.[n]?.vat ?? 1,
       }));
       const sub = r.sub ?? round2(items.reduce((a, i) => a + i.price * i.qty, 0));
       await insertOrder(tx, {
@@ -693,6 +781,7 @@ export async function importBackup(data: {
         status: o.status,
         customer: o.customer,
         items,
+        vatTotal: r.vatTotal ?? orderVat(items, sub, o.disc, o.ship + o.fee, 20),
         sub,
         disc: o.disc,
         ship: o.ship,
@@ -859,6 +948,10 @@ type QuestionRow = {
   answered_at: Date | null;
   answered_by: string | null;
   public: boolean;
+  token: string;
+  last_from: string;
+  last_at: Date;
+  messages?: { from: string; body: string; author: string | null; at: number }[];
 };
 
 function questionOut(r: QuestionRow) {
@@ -874,6 +967,10 @@ function questionOut(r: QuestionRow) {
     answeredAt: r.answered_at ? r.answered_at.getTime() : null,
     answeredBy: r.answered_by,
     public: r.public,
+    token: r.token,
+    lastFrom: r.last_from,
+    lastAt: r.last_at.getTime(),
+    messages: (r.messages ?? []).map((m) => ({ ...m, at: Number(m.at) })),
   };
 }
 
@@ -913,7 +1010,7 @@ function askAllowed(ip: string, contact: string) {
 
 export async function askQuestion(q: z.infer<typeof questionSchema>, ip: string) {
   // Bot tuzağı doluysa sessizce "alındı" de, kaydetme
-  if (q.website) return { ok: true };
+  if (q.website) return { ok: true, token: newToken() };
   if (!askAllowed(ip, q.contact))
     throw new HttpError(429, "Kısa sürede çok fazla soru gönderdiniz. Biraz sonra tekrar deneyin.");
   const sql = await db();
@@ -928,9 +1025,10 @@ export async function askQuestion(q: z.infer<typeof questionSchema>, ip: string)
       productName = p.name;
     }
   }
-  await sql`INSERT INTO questions (pid, product_name, name, contact, question, ip)
-            VALUES (${pid}, ${productName}, ${q.name}, ${q.contact}, ${q.question}, ${ip})`;
-  return { ok: true };
+  const token = newToken();
+  await sql`INSERT INTO questions (pid, product_name, name, contact, question, ip, token, last_from, last_at)
+            VALUES (${pid}, ${productName}, ${q.name}, ${q.contact}, ${q.question}, ${ip}, ${token}, 'musteri', now())`;
+  return { ok: true, token };
 }
 
 /** Ürün sayfasında gösterilecek, yayınlanmış yanıtlar (müşteri iletişim bilgisi döndürülmez) */
@@ -992,4 +1090,99 @@ export async function deleteQuestion(id: number) {
   const sql = await db();
   await sql`DELETE FROM questions WHERE id = ${id}`;
   return { ok: true };
+}
+
+/* ---------- online konuşma ---------- */
+
+/** 144 bit rastgele, tahmin edilemez takip anahtarı */
+function newToken() {
+  const b = crypto.getRandomValues(new Uint8Array(18));
+  let x = "";
+  for (const v of b) x += String.fromCharCode(v);
+  return btoa(x).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+export const tokenSchema = z.string().regex(/^[A-Za-z0-9_-]{20,80}$/, "geçersiz bağlantı");
+
+type ThreadRow = {
+  id: number;
+  pid: string | null;
+  product_name: string;
+  name: string;
+  question: string;
+  created_at: Date;
+  last_from: string;
+};
+
+/** Müşterinin kendi konuşması (iletişim bilgisi döndürülmez) */
+export async function threadFor(token: string) {
+  const sql = await db();
+  const q = (
+    await sql<ThreadRow[]>`
+    SELECT id, pid, product_name, name, question, created_at, last_from FROM questions WHERE token = ${token}`
+  )[0];
+  if (!q) throw new HttpError(404, "Bu soru bulunamadı. Bağlantıyı kontrol edin.");
+  const msgs = await sql<{ sender: string; body: string; created_at: Date }[]>`
+    SELECT sender, body, created_at FROM question_messages WHERE question_id = ${q.id} ORDER BY created_at`;
+  return {
+    pid: q.pid,
+    productName: q.product_name,
+    name: q.name,
+    lastFrom: q.last_from,
+    messages: [
+      { from: "musteri", body: q.question, at: q.created_at.getTime() },
+      ...msgs.map((m) => ({ from: m.sender, body: m.body, at: m.created_at.getTime() })),
+    ],
+  };
+}
+
+export const messageSchema = z.object({
+  body: z.string().trim().min(2, "mesaj çok kısa").max(1000),
+});
+
+export async function customerReply(token: string, body: string) {
+  if (!hit("t:" + token, 8))
+    throw new HttpError(429, "Çok sık mesaj gönderdiniz. Biraz sonra tekrar deneyin.");
+  const sql = await db();
+  return transaction(sql, async (tx) => {
+    const q = (
+      await tx<{ id: number }[]>`SELECT id FROM questions WHERE token = ${token} FOR UPDATE`
+    )[0];
+    if (!q) throw new HttpError(404, "Bu soru bulunamadı.");
+    await tx`INSERT INTO question_messages (question_id, sender, body) VALUES (${q.id}, 'musteri', ${body})`;
+    await tx`UPDATE questions SET last_from = 'musteri', last_at = now() WHERE id = ${q.id}`;
+    return { ok: true };
+  });
+}
+
+/** "Sorularım" rozeti için: müşterinin tarayıcısında kayıtlı konuşmaların son durumu */
+export async function threadStatus(tokens: string[]) {
+  if (!tokens.length) return [];
+  const sql = await db();
+  const rows = await sql<
+    { token: string; product_name: string; question: string; last_from: string; last_at: Date }[]
+  >`
+    SELECT token, product_name, question, last_from, last_at FROM questions WHERE token IN ${sql(tokens)}`;
+  return rows.map((r) => ({
+    t: r.token,
+    productName: r.product_name,
+    question: r.question.length > 90 ? r.question.slice(0, 90) + "…" : r.question,
+    lastFrom: r.last_from,
+    lastAt: r.last_at.getTime(),
+  }));
+}
+
+/** Satıcı yanıtı: konuşmaya eklenir; ilk yanıt aynı zamanda ürün sayfasında yayınlanabilecek yanıttır */
+export async function sellerReply(id: number, body: string, actor: string) {
+  const sql = await db();
+  return transaction(sql, async (tx) => {
+    const q = (
+      await tx<{ answer: string }[]>`SELECT answer FROM questions WHERE id = ${id} FOR UPDATE`
+    )[0];
+    if (!q) throw new HttpError(404, "Soru bulunamadı.");
+    await tx`INSERT INTO question_messages (question_id, sender, body, author) VALUES (${id}, 'satici', ${body}, ${actor})`;
+    await tx`UPDATE questions SET last_from = 'satici', last_at = now() WHERE id = ${id}`;
+    if (!q.answer)
+      await tx`UPDATE questions SET answer = ${body}, answered_at = now(), answered_by = ${actor} WHERE id = ${id}`;
+    return { ok: true };
+  });
 }

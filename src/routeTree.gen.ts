@@ -12,6 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiCouponRouteImport } from './routes/api/coupon'
 import { Route as ApiOrdersRouteImport } from './routes/api/orders'
+import { Route as ApiQuestionStatusRouteImport } from './routes/api/question-status'
+import { Route as ApiQuestionThreadRouteImport } from './routes/api/question-thread'
 import { Route as ApiQuestionsRouteImport } from './routes/api/questions'
 import { Route as ApiStoreRouteImport } from './routes/api/store'
 import { Route as ApiAdminDataRouteImport } from './routes/api/admin/data'
@@ -42,6 +44,16 @@ const ApiCouponRoute = ApiCouponRouteImport.update({
 const ApiOrdersRoute = ApiOrdersRouteImport.update({
   id: '/api/orders',
   path: '/api/orders',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiQuestionStatusRoute = ApiQuestionStatusRouteImport.update({
+  id: '/api/question-status',
+  path: '/api/question-status',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiQuestionThreadRoute = ApiQuestionThreadRouteImport.update({
+  id: '/api/question-thread',
+  path: '/api/question-thread',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiQuestionsRoute = ApiQuestionsRouteImport.update({
@@ -129,6 +141,8 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/api/coupon': typeof ApiCouponRoute
   '/api/orders': typeof ApiOrdersRoute
+  '/api/question-status': typeof ApiQuestionStatusRoute
+  '/api/question-thread': typeof ApiQuestionThreadRoute
   '/api/questions': typeof ApiQuestionsRoute
   '/api/store': typeof ApiStoreRoute
   '/api/admin/data': typeof ApiAdminDataRoute
@@ -150,6 +164,8 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/api/coupon': typeof ApiCouponRoute
   '/api/orders': typeof ApiOrdersRoute
+  '/api/question-status': typeof ApiQuestionStatusRoute
+  '/api/question-thread': typeof ApiQuestionThreadRoute
   '/api/questions': typeof ApiQuestionsRoute
   '/api/store': typeof ApiStoreRoute
   '/api/admin/data': typeof ApiAdminDataRoute
@@ -172,6 +188,8 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/api/coupon': typeof ApiCouponRoute
   '/api/orders': typeof ApiOrdersRoute
+  '/api/question-status': typeof ApiQuestionStatusRoute
+  '/api/question-thread': typeof ApiQuestionThreadRoute
   '/api/questions': typeof ApiQuestionsRoute
   '/api/store': typeof ApiStoreRoute
   '/api/admin/data': typeof ApiAdminDataRoute
@@ -195,6 +213,8 @@ export interface FileRouteTypes {
     | '/'
     | '/api/coupon'
     | '/api/orders'
+    | '/api/question-status'
+    | '/api/question-thread'
     | '/api/questions'
     | '/api/store'
     | '/api/admin/data'
@@ -216,6 +236,8 @@ export interface FileRouteTypes {
     | '/'
     | '/api/coupon'
     | '/api/orders'
+    | '/api/question-status'
+    | '/api/question-thread'
     | '/api/questions'
     | '/api/store'
     | '/api/admin/data'
@@ -237,6 +259,8 @@ export interface FileRouteTypes {
     | '/'
     | '/api/coupon'
     | '/api/orders'
+    | '/api/question-status'
+    | '/api/question-thread'
     | '/api/questions'
     | '/api/store'
     | '/api/admin/data'
@@ -259,6 +283,8 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ApiCouponRoute: typeof ApiCouponRoute
   ApiOrdersRoute: typeof ApiOrdersRoute
+  ApiQuestionStatusRoute: typeof ApiQuestionStatusRoute
+  ApiQuestionThreadRoute: typeof ApiQuestionThreadRoute
   ApiQuestionsRoute: typeof ApiQuestionsRoute
   ApiStoreRoute: typeof ApiStoreRoute
   ApiAdminDataRoute: typeof ApiAdminDataRoute
@@ -297,6 +323,20 @@ declare module '@tanstack/react-router' {
       path: '/api/orders'
       fullPath: '/api/orders'
       preLoaderRoute: typeof ApiOrdersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/question-status': {
+      id: '/api/question-status'
+      path: '/api/question-status'
+      fullPath: '/api/question-status'
+      preLoaderRoute: typeof ApiQuestionStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/question-thread': {
+      id: '/api/question-thread'
+      path: '/api/question-thread'
+      fullPath: '/api/question-thread'
+      preLoaderRoute: typeof ApiQuestionThreadRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/questions': {
@@ -430,6 +470,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ApiCouponRoute: ApiCouponRoute,
   ApiOrdersRoute: ApiOrdersRoute,
+  ApiQuestionStatusRoute: ApiQuestionStatusRoute,
+  ApiQuestionThreadRoute: ApiQuestionThreadRoute,
   ApiQuestionsRoute: ApiQuestionsRoute,
   ApiStoreRoute: ApiStoreRoute,
   ApiAdminDataRoute: ApiAdminDataRoute,

@@ -116,3 +116,34 @@ CREATE TABLE IF NOT EXISTS questions (
 );
 CREATE INDEX IF NOT EXISTS questions_created_idx ON questions (created_at DESC);
 CREATE INDEX IF NOT EXISTS questions_pid_idx ON questions (pid) WHERE public;
+
+-- KDV: satıcı KDV hariç fiyat + oran girer; price (KDV dahil) bunlardan hesaplanıp saklanır
+ALTER TABLE products ADD COLUMN IF NOT EXISTS vat smallint NOT NULL DEFAULT 1;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS net_price numeric(12,2);
+UPDATE products SET net_price = round(price / (1 + vat / 100.0), 2) WHERE net_price IS NULL;
+ALTER TABLE order_items ADD COLUMN IF NOT EXISTS vat smallint NOT NULL DEFAULT 1;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS vat_total numeric(12,2) NOT NULL DEFAULT 0;
+
+-- Online soru-cevap: her soru bir konuşma. Müşteri gizli takip anahtarıyla (token) kendi konuşmasını görür.
+ALTER TABLE questions ADD COLUMN IF NOT EXISTS token text;
+UPDATE questions SET token = md5(random()::text || id::text) || md5(clock_timestamp()::text || random()::text) WHERE token IS NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS questions_token_idx ON questions (token);
+ALTER TABLE questions ADD COLUMN IF NOT EXISTS last_from text;   -- son mesajı kim yazdı: musteri | satici
+ALTER TABLE questions ADD COLUMN IF NOT EXISTS last_at timestamptz;
+CREATE TABLE IF NOT EXISTS question_messages (
+  id          bigserial PRIMARY KEY,
+  question_id integer NOT NULL REFERENCES questions(id) ON DELETE CASCADE,
+  sender      text NOT NULL CHECK (sender IN ('musteri','satici')),
+  body        text NOT NULL,
+  author      text,                 -- satıcı tarafında yanıtlayan kullanıcı
+  created_at  timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS question_messages_q_idx ON question_messages (question_id, created_at);
+-- eski tek-yanıtlı soruları konuşmaya taşı
+INSERT INTO question_messages (question_id, sender, body, author, created_at)
+  SELECT id, 'satici', answer, answered_by, COALESCE(answered_at, created_at) FROM questions q
+  WHERE answer <> '' AND last_from IS NULL
+    AND NOT EXISTS (SELECT 1 FROM question_messages m WHERE m.question_id = q.id);
+UPDATE questions SET last_from = CASE WHEN answer <> '' THEN 'satici' ELSE 'musteri' END,
+                     last_at = COALESCE(answered_at, created_at)
+  WHERE last_from IS NULL;

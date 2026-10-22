@@ -35,6 +35,9 @@ const FIELD: Record<string, string> = {
   contact: "E-posta / telefon",
   question: "Soru",
   answer: "Yanıt",
+  vat: "KDV oranı",
+  net: "KDV hariç fiyat",
+  body: "Mesaj",
 };
 function zodMessage(i: ZodIssueLike | undefined) {
   if (!i) return "Geçersiz veri.";

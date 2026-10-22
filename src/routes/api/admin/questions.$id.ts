@@ -1,7 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { admin, json, owner, readJson } from "@/lib/server/http";
-import { deleteQuestion, patchQuestion, questionPatchSchema } from "@/lib/server/store";
+import {
+  deleteQuestion,
+  messageSchema,
+  patchQuestion,
+  questionPatchSchema,
+  sellerReply,
+} from "@/lib/server/store";
 
 const qid = z.coerce.number().int().positive();
 
@@ -16,6 +22,17 @@ export const Route = createFileRoute("/api/admin/questions/$id")({
             questionPatchSchema.parse(await readJson(request)),
             user.username,
           ),
+        ),
+      ),
+      // konuşmaya satıcı yanıtı ekle
+      POST: admin(async ({ request, params, user }) =>
+        json(
+          await sellerReply(
+            qid.parse(params.id),
+            messageSchema.parse(await readJson(request)).body,
+            user.username,
+          ),
+          201,
         ),
       ),
       DELETE: owner(async ({ params }) => json(await deleteQuestion(qid.parse(params.id)))),

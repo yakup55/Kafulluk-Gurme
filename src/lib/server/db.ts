@@ -79,6 +79,7 @@ async function migrate(sql: Sql) {
           VALUES (${p.id}, ${p.cat}, ${p.name}, ${p.w}, ${p.price}, ${p.old || 0}, ${p.type}, ${p.c1}, ${p.c2},
                   ${p.origin}, ${p.desc}, ${p.store}, ${p.inc ?? null}, ${p.stock}, ${p.active}, ${p.sort})`;
       }
+      await tx`UPDATE products SET net_price = round(price / (1 + vat / 100.0), 2) WHERE net_price IS NULL`;
       await tx`INSERT INTO coupons (code, pct, min, active) VALUES ('KAHVALTI10', 10, 0, true) ON CONFLICT DO NOTHING`;
       await tx`INSERT INTO settings (key, value) VALUES ('store', ${tx.json({})}) ON CONFLICT DO NOTHING`;
     }

@@ -301,6 +301,36 @@ footer .fine{max-width:1240px;margin:28px auto 0;padding-top:16px;border-top:1px
 @media (max-width:720px){.detail{grid-template-columns:minmax(0,1fr)}.detail .art{padding:20px 60px}}
 
 .ask{max-width:620px;padding:30px}
+.vatnote{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
+.sum .tot small{font-size:12px;font-weight:600;color:var(--muted)}
+.sum .vatl{font-size:13px;color:var(--muted)}
+.qlink{margin-top:16px;text-align:left;display:grid;gap:6px;font-size:13.5px;color:var(--muted)}
+.qlink div{display:flex;gap:8px}.qlink input{flex:1;min-width:0;border-radius:10px;border:1px solid var(--line-strong);background:rgba(255,255,255,.04);padding:8px 10px;font-size:13px;color:var(--ink)}
+.ask.done .acts{gap:10px;flex-wrap:wrap}
+.qcount{background:var(--grad)!important;color:var(--on-accent)!important}
+.myql{display:grid;gap:10px;max-height:60vh;overflow:auto}
+.myq{display:grid;gap:4px;text-align:left;padding:13px 15px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.03);transition:border-color .2s}
+.myq:hover{border-color:var(--honey)}.myq.unread{border-color:rgba(245,184,46,.6);background:rgba(245,184,46,.06)}
+.myqt{display:flex;justify-content:space-between;gap:10px;font-weight:700}
+.myqt em{font-style:normal;font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--grad);color:var(--on-accent);white-space:nowrap}
+.myqt em.ok{background:rgba(123,211,154,.15);color:#7BD39A}.myqt em.wait{background:rgba(255,255,255,.08);color:var(--muted)}
+.myqq{color:var(--muted);font-size:14px}.myq small{color:var(--muted);font-size:12px}
+.ask.thread{max-width:640px;display:flex;flex-direction:column;max-height:calc(100vh - 40px)}
+.ask .back{align-self:flex-start;background:none;border:0;color:var(--muted);font-weight:600;font-size:13.5px;padding:0;margin-bottom:8px;cursor:pointer}
+.ask .back:hover{color:var(--honey)}
+.thp span{display:inline-block;font-size:12.5px;font-weight:700;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid var(--line);margin:-6px 0 12px}
+.chat{flex:1;min-height:180px;max-height:52vh;overflow:auto;display:flex;flex-direction:column;gap:10px;padding:12px;border:1px solid var(--line);border-radius:16px;background:rgba(0,0,0,.18)}
+.bub{max-width:82%;padding:10px 13px;border-radius:16px;display:grid;gap:3px}
+.bub b{font-size:12px;color:var(--muted)}.bub p{margin:0;white-space:pre-wrap;font-size:14.5px;line-height:1.5}.bub small{font-size:11.5px;color:var(--muted)}
+.bub.me{align-self:flex-end;background:rgba(245,184,46,.14);border:1px solid rgba(245,184,46,.3);border-bottom-right-radius:6px}
+.bub.them{align-self:flex-start;background:rgba(255,255,255,.06);border:1px solid var(--line);border-bottom-left-radius:6px}
+.waiting{align-self:center;text-align:center;font-size:13px;color:var(--muted);padding:6px 10px}
+.msgf{display:flex;gap:10px;align-items:flex-end;margin-top:12px}
+.msgf textarea{flex:1;min-width:0;border-radius:14px;border:1px solid var(--line-strong);background:rgba(255,255,255,.04);padding:11px 13px;resize:none;min-height:48px;max-height:140px;color:var(--ink);font:inherit}
+.msgf textarea:focus{outline:none;border-color:var(--honey);box-shadow:0 0 0 4px rgba(245,184,46,.15)}
+#msgErr{color:var(--err);font-size:13.5px;margin-top:6px}
+.msgf .btn{flex:none;padding:0 20px}
+@media (max-width:520px){.bub{max-width:92%}.chat{max-height:46vh}.msgf{gap:8px}.msgf .btn{padding:0 14px;height:46px}}
 .ask h2{font-size:30px;font-weight:800;margin-bottom:16px;padding-right:44px}
 .ask.done{text-align:center;max-width:520px}.ask.done .acts{justify-content:center;display:flex;margin-top:20px}
 .askp{display:flex;gap:14px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.03);margin-bottom:16px}
@@ -411,6 +441,7 @@ go(0);})();
     <div class="tools">
       <nav class="nav" aria-label="Bölümler"><a href="#urunler">Ürünler</a><a href="#setler">Setler</a><a href="#sss">Sık sorulanlar</a><a href="#sor" data-act="ask">Soru sor</a></nav>
       <button class="tbtn" id="favBtn" type="button" aria-pressed="false" aria-label="Sadece favorilerim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg><span class="lbl">Favoriler</span><span class="count" id="favCount">0</span></button>
+      <button class="tbtn" id="myQBtn" type="button" data-act="myQ" aria-label="Sorularım" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg><span class="lbl">Sorularım</span><span class="count qcount" id="myQCount" hidden>0</span></button>
       <button class="tbtn cartbtn" id="cartBtn" type="button" aria-label="Sepeti aç"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2.5l2.2 11h10.6L20.5 8H6.2"/><circle cx="9" cy="19.5" r="1.4"/><circle cx="17" cy="19.5" r="1.4"/></svg><span class="lbl">Sepet</span><span class="count" id="cartCount">0</span></button>
     </div>
   </div>
@@ -529,7 +560,7 @@ var ART={
 var CAT_ORDER=["Bal & Pekmez","Reçel & Marmelat","Peynir & Kaymak","Zeytin & Zeytinyağı","Şarküteri","Ezme & Helva","Çay & Kahve","Granola & Kuru Meyve","Kahvaltı Setleri"];
 var CATS=[],P=[],BY={};
 function setProducts(list){
-  P=(list||[]).map(function(x){return {id:x.id,cat:x.cat,name:x.name,w:x.w||"",price:+x.price,old:+x.old||0,type:ART[x.type]?x.type:"jar",c1:x.c1,c2:x.c2,origin:x.origin||"",desc:x.desc||"",store:x.store||"",img:x.img||"",inc:x.inc&&x.inc.length?x.inc.slice():null,stock:Math.max(0,+x.stock||0)};});
+  P=(list||[]).map(function(x){return {id:x.id,cat:x.cat,name:x.name,w:x.w||"",price:+x.price,old:+x.old||0,type:ART[x.type]?x.type:"jar",c1:x.c1,c2:x.c2,origin:x.origin||"",desc:x.desc||"",store:x.store||"",img:x.img||"",inc:x.inc&&x.inc.length?x.inc.slice():null,stock:Math.max(0,+x.stock||0),vat:x.vat==null?1:+x.vat};});
   BY={};P.forEach(function(x){BY[x.id]=x;if(x.img)IMG[x.id]=x.img;});
   P.forEach(function(x){ if(x.inc){ x.inc=x.inc.filter(function(i){return BY[i];}); x.sum=x.inc.reduce(function(s,i){return s+BY[i].price;},0); if(x.sum>x.price)x.old=x.sum; } });
   var seen={};P.forEach(function(x){seen[x.cat]=1;});
@@ -546,7 +577,7 @@ function lsGet(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 /* ---- Mağaza ayarları: kendi koşullarınıza göre düzenleyin ---- */
 /* ---- Mağaza ayarları satıcı panelinden (Ayarlar) yönetilir; burası yalnızca ilk değerlerdir ---- */
-var CONFIG={freeAt:750,ship:59.9,fast:99.9,cod:19.9,phone:"",email:"",address:"",hours:"",whatsapp:"",iban:""};
+var CONFIG={freeAt:750,ship:59.9,fast:99.9,cod:19.9,shipVat:20,phone:"",email:"",address:"",hours:"",whatsapp:"",iban:""};
 var FREE_AT=CONFIG.freeAt,SHIP=CONFIG.ship,FAST=CONFIG.fast,COD=CONFIG.cod;
 function setConfig(st){Object.keys(st||{}).forEach(function(k){if(st[k]!==""&&st[k]!=null)CONFIG[k]=st[k];});FREE_AT=+CONFIG.freeAt;SHIP=+CONFIG.ship;FAST=+CONFIG.fast;COD=+CONFIG.cod;}
 async function api(path,body){
@@ -652,7 +683,7 @@ function renderCart(){
   });
   body.innerHTML=h;
   foot.innerHTML='<div class="coupon"><label class="sr" for="cpn">Kupon kodu</label><input id="cpn" type="text" placeholder="Kupon kodu" autocomplete="off" value="'+(coupon?esc(coupon.code):"")+'"><button type="button" data-act="coupon">Uygula</button></div><div class="msg'+(coupon?' ok':'')+'" id="cpnMsg" aria-live="polite">'+(coupon?esc(coupon.code)+' uygulandı: %'+coupon.pct+' indirim.'+(c.sub<coupon.min?' (En az '+TL(coupon.min)+' sepette geçerli)':''):'')+'</div>'+
-    '<div class="sum tnum"><div><span>Ara toplam</span><span>'+TL(c.sub)+'</span></div>'+(c.disc?'<div class="disc"><span>Kupon indirimi</span><span>−'+TL(c.disc)+'</span></div>':'')+'<div><span>Kargo</span><span>'+(c.ship?TL(c.ship):'Ücretsiz')+'</span></div><div class="tot"><span>Toplam</span><span>'+TL(c.total)+'</span></div></div>'+
+    '<div class="sum tnum"><div><span>Ara toplam</span><span>'+TL(c.sub)+'</span></div>'+(c.disc?'<div class="disc"><span>Kupon indirimi</span><span>−'+TL(c.disc)+'</span></div>':'')+'<div><span>Kargo</span><span>'+(c.ship?TL(c.ship):'Ücretsiz')+'</span></div><div class="tot"><span>Toplam <small>(KDV dahil)</small></span><span>'+TL(c.total)+'</span></div></div>'+
     '<button class="btn block" type="button" data-act="checkout">Siparişi tamamla</button>';
 }
 function addItem(id,n){var x=BY[id];if(!x||x.stock<=0){toast(x?x.name+" tükendi":"Ürün bulunamadı");return false;}
@@ -689,7 +720,7 @@ function openDetail(id){
    '<div class="art" style="--tint:'+x.c1+'"><div style="width:min(100%,340px)">'+vis(x)+'</div></div>'+
    '<div class="info"><span class="ccat">'+esc(x.cat)+'</span><h2>'+esc(x.name)+'</h2><p style="color:var(--muted)">'+esc(x.desc)+'</p>'+inc+
    '<dl><dt>Miktar</dt><dd>'+esc(x.w)+'</dd><dt>Köken</dt><dd>'+esc(x.origin)+'</dd><dt>Saklama</dt><dd>'+esc(x.store)+'</dd></dl>'+
-   '<div>'+priceHTML(x)+'</div>'+
+   '<div>'+priceHTML(x)+'<span class="vatnote">KDV dahil'+(x.vat?' (%'+x.vat+')':'')+'</span></div>'+
    '<div class="buy"><div class="qty" role="group" aria-label="Adet"><button type="button" data-act="dq" data-d="-1" aria-label="Azalt">−</button><span class="tnum" id="dq">1</span><button type="button" data-act="dq" data-d="1" aria-label="Artır">+</button></div>'+
    (x.stock>0?'<button class="btn" type="button" data-act="addDetail">Sepete ekle</button>':'<button class="btn" type="button" disabled>Tükendi</button>')+'</div>'+(x.stock>0&&x.stock<=3?'<p class="few">Stokta son '+x.stock+' adet</p>':'')+relHTML(x)+'<div class="qa" id="qa"><div class="qah"><b>Soru &amp; Cevap</b><button class="btn line2 sm" type="button" data-act="ask" data-id="'+x.id+'">Satıcıya soru sor</button></div><div id="qaList" class="qal"><span class="muted">Yükleniyor…</span></div></div></div>';
   openModal("#detailModal");
@@ -732,31 +763,108 @@ async function sendAsk(){
   chk("a-q",function(t){return t.length>=10;},"Sorunuzu biraz daha açık yazın (en az 10 karakter).");
   if(!ok){$("#"+first).focus();return;}
   var btn=$("#askForm button[type=submit]");asking=true;btn.disabled=true;btn.textContent="Gönderiliyor…";$("#askErr").textContent="";
+  var res;
   try{
-    await api("/api/questions",{name:v("a-name"),contact:v("a-contact"),question:v("a-q"),pid:askPid,website:$("#a-web").value});
+    res=await api("/api/questions",{name:v("a-name"),contact:v("a-contact"),question:v("a-q"),pid:askPid,website:$("#a-web").value});
   }catch(e){asking=false;btn.disabled=false;btn.textContent="Soruyu gönder";$("#askErr").textContent=e.message;return;}
   asking=false;
+  if(res.token){rememberQ(res.token,Date.now());refreshMyQ();}
+  var link=threadLink(res.token);
   $("#askPanel").className="panel ask done";
   $("#askPanel").innerHTML='<button class="x" type="button" data-act="closeAsk" aria-label="Kapat">'+XSVG+'</button><div class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></div><h2>Sorunuz iletildi</h2>'+
-    '<p style="color:var(--muted)">Satıcı en kısa sürede verdiğiniz e-posta ya da telefondan size dönecek.'+(askPid?' Herkesin işine yarayacak yanıtlar ürün sayfasında da yayınlanır.':'')+'</p>'+
+    '<p style="color:var(--muted)">Satıcının yanıtını bu sitede, üstteki <b style="color:var(--ink)">Sorularım</b> bölümünden görebilir ve karşılık yazabilirsiniz. Yanıt gelince size ayrıca e-posta ya da telefonla haber verilebilir.</p>'+
+    '<div class="qlink"><span>Başka bir cihazdan takip etmek için özel bağlantınız:</span><div><input id="qLinkInp" readonly value="'+esc(link)+'"><button class="btn line2 sm" type="button" data-act="copyQLink">Kopyala</button></div></div>'+
     (CONFIG.whatsapp?'<p style="color:var(--muted);margin-top:8px">Acil mi? <a href="https://wa.me/'+String(CONFIG.whatsapp).replace(/\D/g,"")+'" target="_blank" rel="noopener" style="color:var(--honey)">WhatsApp\'tan yazın</a>.</p>':'')+
-    '<div class="acts"><button class="btn" type="button" data-act="closeAsk">Tamam</button></div>';
+    '<div class="acts"><button class="btn" type="button" data-act="openThread" data-t="'+esc(res.token)+'">Konuşmayı aç</button><button class="btn line2" type="button" data-act="closeAsk">Tamam</button></div>';
+}
+
+/* ---------- Sorularım: tarayıcıda saklanan gizli takip anahtarlarıyla online konuşma ---------- */
+function myQs(){var a=lsGet("kg-asks",[]);return Array.isArray(a)?a.filter(function(x){return x&&typeof x.t==="string";}):[];}
+function rememberQ(t,seen){var a=myQs(),f=a.find(function(x){return x.t===t;});if(f){f.seen=Math.max(f.seen||0,seen||0);}else a.unshift({t:t,seen:seen||0});lsSet("kg-asks",a.slice(0,30));}
+function threadLink(t){var base=location.origin+(window.top!==window?"/":location.pathname);return base+"#soru="+t;}
+var myQState=[],unreadKnown=null;
+async function refreshMyQ(){
+  var a=myQs();var btn=$("#myQBtn");btn.hidden=!a.length;if(!a.length)return [];
+  var d;try{d=await api("/api/question-status",{tokens:a.map(function(x){return x.t;})});}catch(e){return myQState;}
+  var seen={};a.forEach(function(x){seen[x.t]=x.seen||0;});
+  myQState=d.items.map(function(i){i.unread=i.lastFrom==="satici"&&i.lastAt>(seen[i.t]||0);return i;}).sort(function(x,y){return y.lastAt-x.lastAt;});
+  var n=myQState.filter(function(i){return i.unread;}).length,c=$("#myQCount");c.hidden=!n;c.textContent=n;
+  if(unreadKnown!==null&&n>unreadKnown)toast("Sorunuza yanıt geldi — Sorularım'a bakın");
+  unreadKnown=n;
+  return myQState;
+}
+function openMyQ(){
+  lastFocus=document.activeElement;
+  var p=$("#askPanel");p.className="panel ask";
+  p.innerHTML='<button class="x" type="button" data-act="closeAsk" aria-label="Kapat">'+XSVG+'</button><h2 id="askTitle">Sorularım</h2><div id="myQList" class="myql"><span class="muted">Yükleniyor…</span></div>'+
+   '<div class="acts" style="margin-top:16px"><button class="btn line2" type="button" data-act="ask">Yeni soru sor</button></div>';
+  if($("#askModal").hidden)openModal("#askModal");
+  refreshMyQ().then(function(items){
+    var box=$("#myQList");if(!box)return;
+    box.innerHTML=items.length?items.map(function(i){return '<button class="myq'+(i.unread?' unread':'')+'" type="button" data-act="openThread" data-t="'+esc(i.t)+'"><span class="myqt">'+(i.productName?esc(i.productName):'Genel soru')+(i.unread?'<em>Yeni yanıt</em>':i.lastFrom==="satici"?'<em class="ok">Yanıtlandı</em>':'<em class="wait">Yanıt bekleniyor</em>')+'</span><span class="myqq">'+esc(i.question)+'</span><small>'+fmtDate(i.lastAt)+'</small></button>';}).join(""):'<span class="muted">Bu tarayıcıda kayıtlı sorunuz yok.</span>';
+  });
+}
+var threadT=null,threadTimer=null,threadCount=0,sendingMsg=false;
+function fmtTime(ms){try{return new Intl.DateTimeFormat("tr-TR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}).format(new Date(ms));}catch(e){return "";}}
+async function openThread(t){
+  threadT=t;threadCount=0;rememberQ(t,0);
+  lastFocus=lastFocus||document.activeElement;
+  var p=$("#askPanel");p.className="panel ask thread";
+  p.innerHTML='<button class="x" type="button" data-act="closeAsk" aria-label="Kapat">'+XSVG+'</button><button class="back" type="button" data-act="myQ" aria-label="Sorularım">← Sorularım</button><h2 id="askTitle">Sorunuz</h2><div class="thp" id="thProd"></div>'+
+   '<div class="chat" id="chat" aria-live="polite"><span class="muted">Yükleniyor…</span></div>'+
+   '<form id="msgForm" class="msgf" novalidate><label class="sr" for="msgInp">Mesajınız</label><textarea id="msgInp" maxlength="1000" rows="2" placeholder="Satıcıya yazın…"></textarea><button class="btn" type="submit">Gönder</button></form><div class="e" id="msgErr" role="alert"></div>';
+  if($("#askModal").hidden)openModal("#askModal");
+  await loadThread(true);
+  clearInterval(threadTimer);
+  // konuşma açıkken 8 sn'de bir yeni mesaj kontrolü
+  threadTimer=setInterval(function(){if(threadT&&!$("#askModal").hidden&&!document.hidden)loadThread(false);else if($("#askModal").hidden){clearInterval(threadTimer);threadT=null;}},8000);
+}
+async function loadThread(first){
+  var t=threadT;if(!t)return;var d;
+  try{d=await api("/api/question-thread?t="+encodeURIComponent(t));}
+  catch(e){var c0=$("#chat");if(c0&&first)c0.innerHTML='<span class="muted">'+esc(e.message)+'</span>';return;}
+  if(t!==threadT)return;renderThread(d.thread,first);
+}
+function renderThread(th,first){
+  var c=$("#chat");if(!c)return;
+  var pr=$("#thProd");if(pr)pr.innerHTML=th.productName?'<span>'+esc(th.productName)+'</span>':'<span>Genel soru</span>';
+  if(!first&&th.messages.length===threadCount)return;
+  var atBottom=c.scrollHeight-c.scrollTop-c.clientHeight<40;
+  var fresh=!first&&th.messages.length>threadCount&&th.messages[th.messages.length-1].from==="satici";
+  threadCount=th.messages.length;
+  c.innerHTML=th.messages.map(function(m){return '<div class="bub '+(m.from==="satici"?"them":"me")+'"><b>'+(m.from==="satici"?esc(CONFIG.name||"Satıcı"):"Siz")+'</b><p>'+esc(m.body)+'</p><small>'+fmtTime(m.at)+'</small></div>';}).join("")+
+   (th.lastFrom==="musteri"?'<div class="waiting">Satıcının yanıtı bekleniyor. Bu pencereyi kapatabilirsiniz; yanıt gelince <b>Sorularım</b>\'da görünür.</div>':'');
+  if(first||atBottom||fresh)c.scrollTop=c.scrollHeight;
+  var last=th.messages[th.messages.length-1];rememberQ(threadT,last?last.at:Date.now());refreshMyQ();
+  if(fresh)toast("Satıcı yanıt verdi");
+}
+async function sendMsg(){
+  var inp=$("#msgInp"),err=$("#msgErr"),v=(inp.value||"").trim();if(sendingMsg)return;err.textContent="";
+  if(v.length<2){err.textContent="Mesajınızı yazın.";inp.focus();return;}
+  var b=$("#msgForm button");sendingMsg=true;b.disabled=true;
+  try{var d=await api("/api/question-thread",{t:threadT,body:v});inp.value="";renderThread(d.thread,true);}
+  catch(e){err.textContent=e.message;}
+  sendingMsg=false;b.disabled=false;inp.focus();
 }
 
 /* ---------- ödeme ---------- */
 var DLV="std",PAY="cod";
+/* Toplamın içindeki KDV — sunucudaki hesapla aynı: kupon satırlara orantılı, kargo/ek bedel kendi oranıyla */
+function vatIn(g,r){return g-g/(1+r/100);}
 function coTotals(){
   var c=calc();
   var ship=c.its.length?(DLV==="fast"?FAST:(c.after>=FREE_AT?0:SHIP)):0;
   var fee=PAY==="cod"?COD:0;
-  return {c:c,ship:ship,fee:fee,total:c.after+ship+fee};
+  var k=c.sub>0?(c.sub-c.disc)/c.sub:1;
+  var vat=c.its.reduce(function(a,i){return a+vatIn(i.p.price*i.q*k,i.p.vat);},0)+vatIn(ship+fee,+CONFIG.shipVat||20);
+  return {c:c,ship:ship,fee:fee,total:c.after+ship+fee,vat:Math.round(vat*100)/100};
 }
 function renderCoSummary(){
   var t=coTotals(),c=t.c;
   $("#coSum").innerHTML='<div class="mini tnum">'+c.its.map(function(i){return '<div><span>'+i.q+' × '+esc(i.p.name)+'</span><span>'+TL(i.p.price*i.q)+'</span></div>';}).join("")+'</div>'+
    '<div class="sum tnum"><div><span>Ara toplam</span><span>'+TL(c.sub)+'</span></div>'+(c.disc?'<div class="disc"><span>Kupon indirimi</span><span>−'+TL(c.disc)+'</span></div>':'')+
    '<div><span>Teslimat</span><span>'+(t.ship?TL(t.ship):'Ücretsiz')+'</span></div>'+(t.fee?'<div><span>Kapıda ödeme bedeli</span><span>'+TL(t.fee)+'</span></div>':'')+
-   '<div class="tot"><span>Toplam</span><span>'+TL(t.total)+'</span></div></div>';
+   '<div class="tot"><span>Toplam <small>(KDV dahil)</small></span><span>'+TL(t.total)+'</span></div><div class="vatl"><span>Toplama dahil KDV</span><span>'+TL(t.vat)+'</span></div></div>';
   $("#stdPrice").textContent=(c.after>=FREE_AT)?"Ücretsiz":TL(SHIP);
 }
 function field(id,label,type,extra,full){
@@ -820,7 +928,7 @@ async function placeOrder(){
   sending=false;
   var no=res.no;
   var lines=res.items.map(function(i){return i.qty+" × "+i.name+" ("+i.w+") — "+TL(i.price*i.qty);});
-  var txt="Sipariş no: "+no+"\n"+lines.join("\n")+"\n\nAra toplam: "+TL(res.sub)+(res.disc?"\nKupon indirimi: −"+TL(res.disc):"")+"\nTeslimat: "+(res.ship?TL(res.ship):"Ücretsiz")+(res.fee?"\nKapıda ödeme bedeli: "+TL(res.fee):"")+"\nToplam: "+TL(res.total)+
+  var txt="Sipariş no: "+no+"\n"+lines.join("\n")+"\n\nAra toplam: "+TL(res.sub)+(res.disc?"\nKupon indirimi: −"+TL(res.disc):"")+"\nTeslimat: "+(res.ship?TL(res.ship):"Ücretsiz")+(res.fee?"\nKapıda ödeme bedeli: "+TL(res.fee):"")+"\nToplam (KDV dahil): "+TL(res.total)+(res.vatTotal!=null?"\nToplama dahil KDV: "+TL(res.vatTotal):"")+
     "\n\nÖdeme: "+(res.pay==="cod"?"Kapıda ödeme":"Havale / EFT")+"\nTeslimat: "+(res.dlv==="fast"?"Hızlı":"Standart")+"\nAlıcı: "+val("f-name")+" · "+val("f-phone")+"\nAdres: "+val("f-addr")+", "+val("f-dist")+" / "+val("f-city");
   var eft=res.pay==="eft"?'<div class="eft"><b>Havale / EFT bilgisi</b>'+(res.iban?'<span>'+esc(CONFIG.name||"Kafulluk Gurme")+'</span><span class="tnum">'+esc(res.iban)+'</span><span>Açıklama kısmına sipariş numaranızı (<b>'+esc(no)+'</b>) yazın. Ödeme ulaştığında siparişiniz hazırlanır.</span>':'<span>Hesap bilgisi kısa süre içinde telefon ya da e-posta ile iletilecek.</span>')+'</div>':'';
   $("#coPanel").className="panel done";
@@ -853,7 +961,10 @@ document.addEventListener("click",function(e){
   else if(act==="closeDetail"){closeModal("#detailModal");}
   else if(act==="closeCo"){closeModal("#coModal");}
   else if(act==="ask"){e.preventDefault();openAsk(id||null);}
-  else if(act==="closeAsk"){closeModal("#askModal");}
+  else if(act==="closeAsk"){closeModal("#askModal");threadT=null;clearInterval(threadTimer);}
+  else if(act==="myQ"){e.preventDefault();threadT=null;clearInterval(threadTimer);openMyQ();}
+  else if(act==="openThread"){openThread(el.dataset.t);}
+  else if(act==="copyQLink"){var li=$("#qLinkInp");try{navigator.clipboard.writeText(li.value).then(function(){toast("Bağlantı kopyalandı");},function(){li.select();});}catch(x){li.select();}}
   else if(act==="dq"){detailQty=Math.max(1,Math.min(maxQty(BY[$("#detailPanel").dataset.id])||1,detailQty+(+el.dataset.d)));$("#dq").textContent=detailQty;}
   else if(act==="addDetail"){var did=$("#detailPanel").dataset.id;if(addItem(did,detailQty)){closeModal("#detailModal");toast(BY[did].name+" sepete eklendi");}}
   else if(act==="copyOrder"){var t=$("#orderTxt");var done=function(){toast("Sipariş özeti kopyalandı");};
@@ -867,7 +978,8 @@ document.addEventListener("keydown",function(e){if(e.key==="Escape")closeTop();}
 $("#detailModal").addEventListener("click",function(e){if(e.target===this)closeTop();});
 $("#coModal").addEventListener("click",function(e){if(e.target===this)closeTop();});
 $("#askModal").addEventListener("click",function(e){if(e.target===this)closeTop();});
-$("#askPanel").addEventListener("submit",function(e){e.preventDefault();sendAsk();});
+$("#askPanel").addEventListener("submit",function(e){e.preventDefault();if(e.target.id==="msgForm")sendMsg();else sendAsk();});
+$("#askPanel").addEventListener("keydown",function(e){if(e.target.id==="msgInp"&&e.key==="Enter"&&(e.ctrlKey||e.metaKey)){e.preventDefault();sendMsg();}});
 $("#askPanel").addEventListener("input",function(e){if(e.target.id&&e.target.id.indexOf("a-")===0)setErr(e.target.id,"");if(e.target.id==="a-q"){var c=$("#aCount");if(c)c.textContent=e.target.value.length+" / 1000";}});
 $("#q").addEventListener("input",function(){state.q=this.value;renderGrid();});
 $("#sortSel").addEventListener("change",function(){state.sort=this.value;renderGrid();});
@@ -926,6 +1038,13 @@ async function loadStore(){
 $("#grid").innerHTML='<div class="empty"><b>Ürünler yükleniyor…</b></div>';
 renderCart();
 (function boot(){loadStore().catch(function(e){$("#grid").innerHTML='<div class="empty"><b>Ürünler yüklenemedi</b>'+esc(e.message)+'<div style="margin-top:16px"><button class="btn" type="button" id="retryLoad">Tekrar dene</button></div></div>';var b=$("#retryLoad");if(b)b.onclick=boot;});})();
+/* özel konuşma bağlantısı: /#soru=ANAHTAR */
+function soruFromHash(){var m=location.hash.match(/^#soru=([A-Za-z0-9_-]{20,80})$/);if(m){rememberQ(m[1],0);setTimeout(function(){openThread(m[1]);},300);try{history.replaceState(null,"",location.pathname+location.search);}catch(e){}}}
+soruFromHash();
+/* ana sayfa iframe'i adresi sonradan #soru=… yapabilir (sayfa yeniden yüklenmez) */
+addEventListener("hashchange",soruFromHash);
+refreshMyQ();
+setInterval(function(){if(!document.hidden)refreshMyQ();},60000);
 /* sekmeye geri dönüldüğünde stokları tazele */
 document.addEventListener("visibilitychange",function(){if(!document.hidden&&P.length)loadStore().catch(function(){});});
 })();

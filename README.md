@@ -42,12 +42,21 @@ Gurme kahvaltılık ürünler satan e-ticaret sitesi: vitrin (`/`), satıcı pan
 
 Lovable üzerinde yayınlıyorsanız aynı değişkenleri projenin **Secrets** bölümüne ekleyin.
 
-## Satıcıya soru (Soru & Cevap)
+## KDV
 
-- Vitrinde menüdeki **Soru sor**, SSS altındaki kutu ve her ürün sayfasındaki **Satıcıya soru sor** ile müşteri ad, e-posta/telefon ve sorusunu gönderir.
-- Panelde **Sorular** ekranı: bekleyen soru sayısı menüde ve sekme başlığında görünür, yeni soru gelince bildirim çıkar. Yanıt yazılır; ürünle ilgili yanıtlar **Ürün sayfasında yayınla** ile vitrinde "Soru & Cevap" altında gösterilir (müşteri adı "Ayşe Y." şeklinde kısaltılır, iletişim bilgisi asla gösterilmez). **E-posta / WhatsApp ile gönder** hazır mesajla müşteriye yanıt açar.
-- Personel yanıtlayabilir ve yayınlayabilir; soru silme yönetici yetkisindedir.
-- Spam koruması: bot tuzağı alanı, aynı e-posta/telefondan 10 dk'da 4, aynı IP'den 20 soru. Nginx arkasında gerçek IP için `proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;` ekleyin.
+- Satıcı ürün formunda **KDV hariç fiyat** ve **KDV oranı** (%1 / %10 / %20 / %0) girer; müşterinin göreceği **KDV dahil fiyat** canlı hesaplanır. İsterseniz KDV dahil fiyatı yazın, KDV hariç fiyat geri hesaplanır.
+- Vitrinde fiyatlar KDV dahildir; ürün sayfasında oran, ödeme özetinde "Toplama dahil KDV" gösterilir.
+- Her sipariş satırı o anki KDV oranıyla, siparişin toplam KDV'si (`orders.vat_total`) ile saklanır. Kupon indirimi satırlara orantılı dağıtılır; kargo ve kapıda ödeme bedeli **Ayarlar → Kargo ve kapıda ödeme KDV oranı** ile (varsayılan %20). Panelde sipariş detayında ve CSV'de KDV görünür.
+- Mevcut ürünlerin KDV hariç fiyatı, KDV dahil fiyatlarından %1 varsayılarak hesaplandı. **Ürün bazında doğru oranları mali müşavirinizle teyit edin** (temel gıdaların çoğu %1; kahve, şarküteri, hediye kutusu gibi ürünlerde farklı olabilir).
+
+## Satıcıya soru — online konuşma
+
+- Müşteri vitrinde **Soru sor** (menü, SSS altı, ürün sayfası) ile sorar; soruya tahmin edilemez bir **takip anahtarı** verilir ve tarayıcısına kaydedilir.
+- Satıcının yanıtı müşterinin sitedeki **Sorularım** ekranında görünür; açık konuşma 8 sn'de bir kendiliğinden yenilenir, müşteri oradan karşılık yazabilir. Menüde okunmamış yanıt rozeti çıkar.
+- Başka cihazdan takip için **özel bağlantı**: `https://site/#soru=ANAHTAR`. Panelde **Müşteri bağlantısını kopyala**, **E-posta / WhatsApp ile haber ver** bu bağlantıyı içeren hazır mesaj açar.
+- Panelde **Sorular**: konuşma geçmişi, yanıt kutusu, "Yanıt bekliyor / Yanıtlandı" durumu, yeni soru ve yeni müşteri mesajı bildirimi. Ürünle ilgili ilk yanıt **Ürün sayfasında yayınla** ile vitrinde "Soru & Cevap" altında herkese gösterilebilir (ad kısaltılır, iletişim bilgisi asla gösterilmez).
+- Personel yanıtlayabilir ve yayınlayabilir; silme yöneticide.
+- Spam koruması: bot tuzağı alanı, aynı e-posta/telefondan 10 dk'da 4 soru, aynı IP'den 20 soru, konuşma başına 10 dk'da 8 mesaj. Nginx arkasında gerçek IP için `proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;` ekleyin.
 
 ## Demo veri
 
@@ -69,8 +78,10 @@ Siparişler **örnek** işaretlidir; canlıya geçmeden önce Panel → Özet �
 | GET | `/api/store` | Satıştaki ürünler (stokla) + mağaza ayarları |
 | POST | `/api/coupon` | `{ code, sub }` kupon doğrulama |
 | POST | `/api/orders` | Müşteri siparişi |
-| GET/POST | `/api/questions` | Ürünün yayınlanmış soru-cevapları (`?pid=`) / satıcıya soru gönder |
-| PATCH/DELETE | `/api/admin/questions/:id` | Yanıtla, yayınla / sil (yönetici) |
+| GET/POST | `/api/questions` | Ürünün yayınlanmış soru-cevapları (`?pid=`) / satıcıya soru gönder (takip anahtarı döner) |
+| GET/POST | `/api/question-thread` | Müşterinin konuşması (`?t=`) / müşteri mesajı `{ t, body }` |
+| POST | `/api/question-status` | Sorularım listesi ve okunmamış yanıtlar `{ tokens }` |
+| POST/PATCH/DELETE | `/api/admin/questions/:id` | Konuşmaya yanıt `{ body }` / yayınla / sil (yönetici) |
 | POST | `/api/admin/login` · `/api/admin/logout` | Panel oturumu (`{ username, password }`, HttpOnly çerez) |
 | GET | `/api/admin/me` | Giriş yapmış kullanıcı ve rolü |
 | POST | `/api/admin/password` | Kendi şifresini değiştir |

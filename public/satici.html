@@ -170,8 +170,20 @@ button.trow:hover,.trow.hov:hover{background:rgba(255,255,255,.04)}
 .rl{display:grid;gap:2px}
 .rl .trow{padding:11px 4px;--cols:minmax(0,1fr) auto}
 .skel{height:84px;border-radius:20px;background:linear-gradient(90deg,rgba(255,255,255,.04) 25%,rgba(255,255,255,.09) 50%,rgba(255,255,255,.04) 75%);background-size:200% 100%;animation:shimmer 1.4s linear infinite}
+.pricehint{font-size:13.5px;color:var(--muted);padding:10px 12px;border-radius:12px;background:rgba(245,184,46,.07);border:1px solid rgba(245,184,46,.25)}
+.pricehint b{color:var(--ink)}
 .qlist{display:grid;gap:14px}
 .qcard{padding:18px 20px;display:grid;gap:12px}
+.qtags{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.qst{font-size:12px;font-weight:700;padding:4px 9px;border-radius:999px}.qst.wait{background:rgba(245,184,46,.15);color:var(--honey)}.qst.ok{background:rgba(123,211,154,.12);color:var(--leaf)}
+.qchat{display:flex;flex-direction:column;gap:8px;max-height:340px;overflow:auto;padding:10px;border-radius:14px;background:rgba(0,0,0,.18);border:1px solid var(--line)}
+.qb{max-width:80%;padding:9px 12px;border-radius:14px;display:grid;gap:2px}
+.qb b{font-size:12px;color:var(--muted)}.qb p{margin:0;white-space:pre-wrap;font-size:14.5px;line-height:1.5}.qb small{font-size:11.5px;color:var(--muted)}
+.qb.them{align-self:flex-start;background:rgba(255,255,255,.06);border:1px solid var(--line);border-bottom-left-radius:5px}
+.qb.me{align-self:flex-end;background:rgba(245,184,46,.13);border:1px solid rgba(245,184,46,.3);border-bottom-right-radius:5px}
+.qreply{display:flex;gap:8px;align-items:flex-end}
+.qreply textarea{flex:1;min-width:0;border-radius:12px;border:1px solid var(--line-strong);background:rgba(255,255,255,.04);padding:10px 12px;min-height:44px;resize:vertical;font:inherit;color:var(--ink)}
+.qreply textarea:focus{outline:none;border-color:var(--honey)}
 .qcard.open{border-color:rgba(245,184,46,.45)}
 .qtop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
 .qtop b{display:block}.qtop .s{color:var(--muted);font-size:13.5px}.qtop a{color:inherit}
@@ -334,7 +346,7 @@ function parseSummary(t,products){
 /* ===== durum ===== */
 var CATS=["Bal & Pekmez","Reçel & Marmelat","Peynir & Kaymak","Zeytin & Zeytinyağı","Şarküteri","Ezme & Helva","Çay & Kahve","Granola & Kuru Meyve","Kahvaltı Setleri"];
 var TYPES=[["jar","Kavanoz"],["bottle","Şişe"],["cheese","Peynir"],["olives","Zeytin"],["sausage","Şarküteri"],["pack","Paket"],["tub","Kutu / teneke"],["box","Set kutusu"]];
-var DEF={name:"Kafulluk Gurme",phone:"",email:"",address:"",hours:"",whatsapp:"",iban:"",freeAt:750,ship:59.9,fast:99.9,cod:19.9,lowStock:5};
+var DEF={name:"Kafulluk Gurme",phone:"",email:"",address:"",hours:"",whatsapp:"",iban:"",shipVat:20,freeAt:750,ship:59.9,fast:99.9,cod:19.9,lowStock:5};
 var VIEWS=[["panel","Özet"],["siparisler","Siparişler"],["sorular","Sorular"],["urunler","Ürünler"],["kuponlar","Kuponlar"],["ayarlar","Ayarlar"],["kullanicilar","Kullanıcılar"]];
 /* rol: "yonetici" her şeyi görür; "personel" sipariş ve stok işleri yapar */
 var OWNER_ONLY={kuponlar:1,ayarlar:1,kullanicilar:1};
@@ -382,7 +394,7 @@ function renderMe(){
    '<div class="meacts"><button type="button" data-act="myPassword">Şifremi değiştir</button><button type="button" data-act="logout">Çıkış yap</button></div>';
 }
 function renderNav(){
-  var pend=olist().filter(function(o){return o.status==="yeni";}).length,low=lowList().length,qopen=qlist().filter(function(q){return !q.answer;}).length;
+  var pend=olist().filter(function(o){return o.status==="yeni";}).length,low=lowList().length,qopen=qlist().filter(qWaiting).length;
   $("#nav").innerHTML=views().map(function(v){
     var n=v[0]==="sorular"&&qopen?'<span class="n">'+qopen+'</span>':v[0]==="siparisler"&&pend?'<span class="n">'+pend+'</span>':(v[0]==="urunler"&&low?'<span class="n warn" title="Düşük stok">'+low+'</span>':"");
     return '<button class="nb" type="button" data-act="nav" data-v="'+v[0]+'"'+(S.view===v[0]?' aria-current="page"':"")+'>'+ico(v[0])+v[1]+n+'</button>';
@@ -470,7 +482,7 @@ function renderDrawer(){
    '<div><h4>Durum</h4><div class="steps">'+ST.map(function(s){return '<button type="button" data-act="setStatus" data-id="'+o.id+'" data-k="'+s.k+'" style="--c:'+s.c+'" aria-pressed="'+(o.status===s.k)+'">'+s.l+'</button>';}).join("")+'</div>'+(nx&&o.status!=="iptal"?'<button class="btn sm" type="button" style="margin-top:12px" data-act="setStatus" data-id="'+o.id+'" data-k="'+nx.k+'">Sonraki adım: '+nx.l+'</button>':'')+'</div>'+
    '<div><h4>Müşteri</h4><dl class="kv"><dt>Ad soyad</dt><dd>'+esc(c.name||"-")+'</dd><dt>Telefon</dt><dd>'+esc(c.phone||"-")+'</dd><dt>E-posta</dt><dd>'+esc(c.email||"-")+'</dd><dt>Adres</dt><dd>'+esc(addr||"-")+'</dd>'+(c.note?'<dt>Müşteri notu</dt><dd>'+esc(c.note)+'</dd>':'')+'</dl><button class="btn ghost sm" type="button" style="margin-top:12px" data-act="copyLabel" data-id="'+o.id+'">Teslimat etiketini kopyala</button></div>'+
    '<div><h4>Ürünler</h4><div class="tots tnum">'+(o.items||[]).map(function(i){return '<div><span>'+i.qty+' × '+esc(i.name)+' <span class="muted">('+esc(i.w||"")+')</span></span><span>'+TL(i.price*i.qty)+'</span></div>';}).join("")+
-     '<div class="muted"><span>Ara toplam</span><span>'+TL(o.sub)+'</span></div>'+(o.disc?'<div style="color:var(--leaf)"><span>İndirim</span><span>−'+TL(o.disc)+'</span></div>':'')+'<div class="muted"><span>Teslimat ('+(o.dlv==="fast"?"hızlı":"standart")+')</span><span>'+(o.ship?TL(o.ship):"Ücretsiz")+'</span></div>'+(o.fee?'<div class="muted"><span>Kapıda ödeme bedeli</span><span>'+TL(o.fee)+'</span></div>':'')+'<div class="tt"><span>Toplam</span><span>'+TL(o.total)+'</span></div></div>'+
+     '<div class="muted"><span>Ara toplam</span><span>'+TL(o.sub)+'</span></div>'+(o.disc?'<div style="color:var(--leaf)"><span>İndirim</span><span>−'+TL(o.disc)+'</span></div>':'')+'<div class="muted"><span>Teslimat ('+(o.dlv==="fast"?"hızlı":"standart")+')</span><span>'+(o.ship?TL(o.ship):"Ücretsiz")+'</span></div>'+(o.fee?'<div class="muted"><span>Kapıda ödeme bedeli</span><span>'+TL(o.fee)+'</span></div>':'')+'<div class="tt"><span>Toplam (KDV dahil)</span><span>'+TL(o.total)+'</span></div>'+(o.vatTotal?'<div class="muted"><span>Toplama dahil KDV</span><span>'+TL(o.vatTotal)+'</span></div>':'')+'</div>'+
      '<p class="muted" style="margin-top:8px;font-size:14px">Ödeme: '+(o.pay==="eft"?"Havale / EFT":"Kapıda ödeme")+(o.coupon?' · Kupon: '+esc(o.coupon):'')+' · Kaynak: '+(o.source==="web"?"Web sitesi":o.source==="panel"?"Panelden girildi"+(o.createdBy?" ("+esc(o.createdBy)+")":""):esc(o.source||"-"))+(o.statusBy?' · Durumu son değiştiren: '+esc(o.statusBy):'')+'</p></div>'+
    '<div><h4>Kargo</h4><div class="fg"><div class="fld"><label for="cg-firm">Kargo firması</label><input id="cg-firm" value="'+esc(cg.firm||"")+'" autocomplete="off"></div><div class="fld"><label for="cg-track">Takip numarası</label><input id="cg-track" value="'+esc(cg.track||"")+'" autocomplete="off"></div></div></div>'+
    '<div class="fld"><label for="o-note">Satıcı notu (müşteri görmez)</label><textarea id="o-note">'+esc(o.note||"")+'</textarea></div>'+
@@ -510,7 +522,7 @@ function productsListHTML(){
     var low=p.active!==false&&(+p.stock||0)<=t;
     return '<div class="trow pc hov"><div class="sw swatch" style="--c1:'+esc(p.c1||"#E3A21A")+';--c2:'+esc(p.c2||"#7A4B00")+'" aria-hidden="true">'+esc((p.name||"?").charAt(0))+'</div>'+
      '<div class="nm"><b>'+esc(p.name)+'</b><span class="s">'+esc(p.w||"")+(p.origin?' · '+esc(p.origin):'')+'</span></div><div class="ct muted">'+esc(p.cat)+'</div>'+
-     '<div class="pr tnum"><b>'+TL(p.price)+'</b>'+(p.old?'<span class="s"><s>'+TL(p.old)+'</s></span>':'')+'</div>'+
+     '<div class="pr tnum"><b>'+TL(p.price)+'</b><span class="s">KDV hariç '+TL(p.net!=null?p.net:p.price)+' · %'+(p.vat==null?1:p.vat)+'</span>'+(p.old?'<span class="s"><s>'+TL(p.old)+'</s></span>':'')+'</div>'+
      '<div class="st"><div class="stk'+(low?' low':'')+'"><button type="button" data-act="stk" data-id="'+p.id+'" data-d="-1" aria-label="Stoğu azalt">−</button><span class="tnum">'+(+p.stock||0)+'</span><button type="button" data-act="stk" data-id="'+p.id+'" data-d="1" aria-label="Stoğu artır">+</button></div></div>'+
      '<div class="tg"><label class="sw"><span class="sr">'+esc(p.name)+' satışta</span><input type="checkbox" data-chg="active" data-id="'+p.id+'"'+(isOwner()?'':' disabled')+(p.active!==false?' checked':'')+'><i></i></label></div>'+
      '<div class="ed">'+(isOwner()?'<button class="iconbtn" type="button" data-act="editProduct" data-id="'+p.id+'" aria-label="'+esc(p.name)+' düzenle">'+EDIT+'</button>':'')+'</div></div>';}).join("");
@@ -528,15 +540,18 @@ async function stockChange(id,d){
   delete busy["p"+id];
 }
 function openProductForm(id){
-  var p=id?S.p[id]:{name:"",cat:CATS[0],w:"",price:"",old:0,stock:20,active:true,origin:"",desc:"",store:"Serin ve kuru yerde saklayın.",type:"jar",c1:"#E3A21A",c2:"#7A4B00"};
+  var p=id?S.p[id]:{name:"",cat:CATS[0],w:"",price:"",old:0,net:"",oldNet:0,vat:1,stock:20,active:true,origin:"",desc:"",store:"Serin ve kuru yerde saklayın.",type:"jar",c1:"#E3A21A",c2:"#7A4B00"};
   M={kind:"product",id:id||null};
   var cats=CATS.slice();if(p.cat&&cats.indexOf(p.cat)<0)cats.push(p.cat);
   $("#panel").innerHTML='<button class="x" type="button" data-act="closeModal" aria-label="Kapat">'+XICON+'</button><h2>'+(id?'Ürünü düzenle':'Yeni ürün')+'</h2><form id="pForm" novalidate>'+
    '<div class="fg"><div class="full">'+fld("pf-name","Ürün adı",p.name,"text",'autocomplete="off"')+'</div>'+
    '<div class="fld"><label for="pf-cat">Kategori</label><select id="pf-cat">'+cats.map(function(c){return '<option'+(c===p.cat?' selected':'')+'>'+esc(c)+'</option>';}).join("")+'</select></div>'+
    fld("pf-w","Miktar (örn. 450 g)",p.w,"text",'autocomplete="off"')+
-   fld("pf-price","Satış fiyatı (₺)",p.price,"text",'inputmode="decimal" autocomplete="off"')+
-   fld("pf-old","Eski fiyat (₺, indirim için)",p.old||"","text",'inputmode="decimal" autocomplete="off"')+
+   fld("pf-net","Satış fiyatı — KDV hariç (₺)",p.net!=null&&p.net!==""?p.net:"","text",'inputmode="decimal" autocomplete="off" data-price="net"')+
+   '<div class="fld"><label for="pf-vat">KDV oranı</label><select id="pf-vat" data-price="vat">'+VATS.map(function(v){return '<option value="'+v+'"'+((p.vat==null?1:+p.vat)===v?' selected':'')+'>%'+v+(v===1?' (temel gıda)':'')+'</option>';}).join("")+'</select><div class="e" id="e-pf-vat"></div></div>'+
+   fld("pf-gross","Müşterinin göreceği fiyat — KDV dahil (₺)",p.price||"","text",'inputmode="decimal" autocomplete="off" data-price="gross"')+
+   fld("pf-oldnet","İndirim öncesi fiyat — KDV hariç (₺, isteğe bağlı)",p.oldNet||"","text",'inputmode="decimal" autocomplete="off" data-price="oldnet"')+
+   '<div class="full pricehint" id="priceHint"></div>'+
    fld("pf-stock","Stok (adet)",p.stock,"text",'inputmode="numeric" autocomplete="off"')+
    fld("pf-origin","Köken",p.origin||"","text",'autocomplete="off"')+
    '<div class="full">'+fld("pf-desc","Açıklama",p.desc||"","textarea")+'</div>'+
@@ -546,68 +561,72 @@ function openProductForm(id){
    '<label class="opt" style="margin-top:14px"><input type="checkbox" id="pf-active"'+(p.active!==false?' checked':'')+'><span>Vitrinde satışta</span></label>'+
    '<div class="foot"><div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" type="submit">Kaydet</button><button class="btn ghost" type="button" data-act="closeModal">Vazgeç</button></div>'+(id?'<button class="btn danger" type="button" data-act="delProduct" data-id="'+id+'" data-arm="Emin misiniz? Evet, sil">Ürünü sil</button>':'')+'</div></form>';
   showModal();
+  syncPrice("net");
 }
 async function saveProduct(){
   var ok=true;function bad(id,m){var e=$("#e-"+id);if(e)e.textContent=m;var f=$("#"+id);if(f&&f.parentNode)f.parentNode.classList.add("bad");ok=false;}
-  ["pf-name","pf-price","pf-stock"].forEach(function(i){var e=$("#e-"+i);if(e)e.textContent="";$("#"+i).parentNode.classList.remove("bad");});
-  var name=gv("pf-name"),price=num(gv("pf-price")),stock=gv("pf-stock")===""?NaN:Math.floor(num(gv("pf-stock")));
+  ["pf-name","pf-net","pf-stock"].forEach(function(i){var e=$("#e-"+i);if(e)e.textContent="";$("#"+i).parentNode.classList.remove("bad");});
+  var name=gv("pf-name"),net=num(gv("pf-net")),vat=+$("#pf-vat").value,stock=gv("pf-stock")===""?NaN:Math.floor(num(gv("pf-stock")));
   if(name.length<2)bad("pf-name","Ürün adını yazın.");
-  if(!(price>0))bad("pf-price","Fiyatı sıfırdan büyük girin.");
+  if(!(net>0))bad("pf-net","KDV hariç fiyatı sıfırdan büyük girin.");
   if(isNaN(stock)||stock<0)bad("pf-stock","Stok adedini girin.");
   if(!ok)return;
-  var old=num(gv("pf-old"));
+  var oldNet=num(gv("pf-oldnet"));
   var base=M.id?Object.assign({},S.p[M.id]):{};delete base.id;
-  var doc=Object.assign(base,{name:name,cat:$("#pf-cat").value,w:gv("pf-w"),price:price,old:old>price?old:0,stock:stock,origin:gv("pf-origin"),desc:gv("pf-desc"),store:gv("pf-store"),img:gv("pf-img"),type:$("#pf-type").value,c1:$("#pf-c1").value,c2:$("#pf-c2").value,active:$("#pf-active").checked});
+  var doc=Object.assign(base,{name:name,cat:$("#pf-cat").value,w:gv("pf-w"),net:net,vat:vat,oldNet:oldNet>net?oldNet:0,stock:stock,origin:gv("pf-origin"),desc:gv("pf-desc"),store:gv("pf-store"),img:gv("pf-img"),type:$("#pf-type").value,c1:$("#pf-c1").value,c2:$("#pf-c2").value,active:$("#pf-active").checked});
+  delete doc.price;delete doc.old;
   if(!M.id)doc.sort=Date.now();
   var id=M.id||(name.toLowerCase().replace(/ğ/g,"g").replace(/ü/g,"u").replace(/ş/g,"s").replace(/ı/g,"i").replace(/ö/g,"o").replace(/ç/g,"c").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,40)||"urun")+"-"+Math.random().toString(36).slice(2,6);
   if(await w(function(){return db.doc("products/"+id).set(doc);},M.id?"Ürün güncellendi":"Ürün eklendi"))closeModal();
 }
 
-/* ===== müşteri soruları ===== */
-function qlist(){return Object.keys(S.q).map(function(k){return S.q[k];}).sort(function(a,b){return (!!a.answer-!!b.answer)||b.createdAt-a.createdAt;});}
+/* ===== müşteri soruları (online konuşma) ===== */
+function qWaiting(q){return q.lastFrom!=="satici";}
+function qlist(){return Object.keys(S.q).map(function(k){return S.q[k];}).sort(function(a,b){return (qWaiting(b)-qWaiting(a))||b.lastAt-a.lastAt;});}
 function qContact(c){var d=String(c||"").replace(/\D/g,"");
   if(/@/.test(c))return {type:"mail",href:"mailto:"+c};
   if(d.length>=10){var wa=d.length===10?"90"+d:d.length===11&&d[0]==="0"?"9"+d:d;return {type:"tel",href:"tel:+"+wa,wa:wa};}
   return {type:"?"};}
+function qLink(q){return location.origin+"/#soru="+q.token;}
 function viewQuestions(){
-  var qs=qlist(),open=qs.filter(function(q){return !q.answer;}).length;
+  var qs=qlist(),open=qs.filter(qWaiting).length;
   var f=[["bekleyen","Yanıt bekleyen",open],["yanitlanan","Yanıtlanan",qs.length-open],["all","Tümü",qs.length]];
-  var r=qs.filter(function(q){return S.qf==="all"||(S.qf==="bekleyen"?!q.answer:!!q.answer);});
-  return '<div class="phead"><div><h1>Müşteri soruları</h1><p>Vitrinden gelen soruları yanıtlayın. Ürünle ilgili yanıtları ürün sayfasında yayınlayabilir, e-posta ya da WhatsApp ile müşteriye gönderebilirsiniz.</p></div></div>'+
+  var r=qs.filter(function(q){return S.qf==="all"||(S.qf==="bekleyen"?qWaiting(q):!qWaiting(q));});
+  return '<div class="phead"><div><h1>Müşteri soruları</h1><p>Yanıtınız müşterinin sitedeki <b>Sorularım</b> ekranında anında görünür; müşteri oradan karşılık yazabilir. İsterseniz e-posta ya da WhatsApp ile de haber verin.</p></div></div>'+
    '<div class="chips" style="margin-bottom:14px">'+f.map(function(x){return '<button class="chip" type="button" data-act="qf" data-k="'+x[0]+'" aria-pressed="'+(S.qf===x[0])+'">'+x[1]+'<small>'+x[2]+'</small></button>';}).join("")+'</div>'+
    (r.length?'<div class="qlist">'+r.map(qCard).join("")+'</div>':'<div class="box"><div class="empty"><b>'+(S.qf==="bekleyen"?"Yanıt bekleyen soru yok":"Soru yok")+'</b>Müşteriler vitrinde "Soru sor" ile ya da ürün sayfasından soru gönderebilir.</div></div>');
 }
 function qCard(q){
-  var c=qContact(q.contact),draft=S.qdraft[q.id]!=null?S.qdraft[q.id]:q.answer;
-  return '<div class="box qcard'+(q.answer?'':' open')+'"><div class="qtop"><div><b>'+esc(q.name)+'</b><span class="s">'+
+  var c=qContact(q.contact),draft=S.qdraft[q.id]||"",w=qWaiting(q);
+  var msgs=[{from:"musteri",body:q.question,at:q.createdAt}].concat(q.messages||[]);
+  return '<div class="box qcard'+(w?' open':'')+'"><div class="qtop"><div><b>'+esc(q.name)+'</b><span class="s">'+
     (c.href?'<a href="'+esc(c.href)+'">'+esc(q.contact)+'</a>':esc(q.contact))+' · '+dFmt(q.createdAt)+'</span></div>'+
-    '<span class="qprod">'+(q.pid?esc(q.productName||q.pid):'Genel soru')+'</span></div>'+
-    '<p class="qq">'+esc(q.question)+'</p>'+
-    '<div class="fld"><label for="qa-'+q.id+'">Yanıtınız</label><textarea id="qa-'+q.id+'" data-qa="'+q.id+'" placeholder="Yanıtınızı yazın…">'+esc(draft)+'</textarea></div>'+
-    '<div class="qacts"><button class="btn sm" type="button" data-act="qSave" data-id="'+q.id+'">'+(q.answer?'Yanıtı güncelle':'Yanıtı kaydet')+'</button>'+
-     (c.type==="mail"?'<button class="btn ghost sm" type="button" data-act="qSend" data-k="mail" data-id="'+q.id+'">E-posta ile gönder</button>':'')+
-     (c.type==="tel"?'<button class="btn ghost sm" type="button" data-act="qSend" data-k="wa" data-id="'+q.id+'">WhatsApp ile gönder</button>':'')+
-     (q.pid?'<label class="opt qpub"><input type="checkbox" data-chg="qpub" data-id="'+q.id+'"'+(q.public?' checked':'')+(q.answer?'':' disabled')+'><span>Ürün sayfasında yayınla</span></label>':'')+
+    '<div class="qtags">'+(w?'<span class="qst wait">Yanıt bekliyor</span>':'<span class="qst ok">Yanıtlandı</span>')+'<span class="qprod">'+(q.pid?esc(q.productName||q.pid):'Genel soru')+'</span></div></div>'+
+    '<div class="qchat">'+msgs.map(function(m){return '<div class="qb '+(m.from==="satici"?"me":"them")+'"><b>'+(m.from==="satici"?esc(m.author||"Satıcı"):esc(q.name))+'</b><p>'+esc(m.body)+'</p><small>'+dFmt(m.at)+'</small></div>';}).join("")+'</div>'+
+    '<div class="qreply"><label class="sr" for="qa-'+q.id+'">Yanıtınız</label><textarea id="qa-'+q.id+'" data-qa="'+q.id+'" rows="2" placeholder="'+(w?'Yanıtınızı yazın…':'Ek mesaj yazın…')+'">'+esc(draft)+'</textarea><button class="btn sm" type="button" data-act="qSend" data-k="site" data-id="'+q.id+'">Gönder</button></div>'+
+    '<div class="qacts">'+
+     (c.type==="mail"?'<button class="btn ghost sm" type="button" data-act="qNotify" data-k="mail" data-id="'+q.id+'">E-posta ile haber ver</button>':'')+
+     (c.type==="tel"?'<button class="btn ghost sm" type="button" data-act="qNotify" data-k="wa" data-id="'+q.id+'">WhatsApp ile haber ver</button>':'')+
+     '<button class="btn ghost sm" type="button" data-act="qCopy" data-id="'+q.id+'">Müşteri bağlantısını kopyala</button>'+
+     (q.pid?'<label class="opt qpub" title="İlk yanıtınız ürün sayfasında herkese görünür"><input type="checkbox" data-chg="qpub" data-id="'+q.id+'"'+(q.public?' checked':'')+(q.answer?'':' disabled')+'><span>Ürün sayfasında yayınla</span></label>':'')+
      (isOwner()?'<button class="iconbtn" type="button" data-act="qDel" data-id="'+q.id+'" data-arm="!" aria-label="Soruyu sil" title="Sil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h14M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></button>':'')+
-    '</div>'+(q.answer?'<p class="muted qmeta">Yanıtlayan: '+esc(q.answeredBy||"-")+(q.answeredAt?' · '+dFmt(q.answeredAt):'')+(q.public?' · <b style="color:var(--leaf)">Ürün sayfasında yayında</b>':'')+'</p>':'')+'</div>';
+    '</div>'+(q.public&&q.answer?'<p class="muted qmeta"><b style="color:var(--leaf)">Ürün sayfasında yayında:</b> '+esc(q.answer.length>120?q.answer.slice(0,120)+"…":q.answer)+'</p>':'')+'</div>';
 }
-async function qSave(id){
-  var t=$("#qa-"+id),ans=t?t.value.trim():"";
-  if(!ans){toast("Önce yanıtınızı yazın",true);if(t)t.focus();return false;}
-  var ok=await w(function(){return db.doc("questions/"+id).update({answer:ans});},"Yanıt kaydedildi");
-  if(ok)delete S.qdraft[id];
+async function qSend(id){
+  var t=$("#qa-"+id),body=t?t.value.trim():"";
+  if(body.length<2){toast("Önce mesajınızı yazın",true);if(t)t.focus();return false;}
+  var ok=await w(function(){return db.qReply(id,body);},"Yanıt gönderildi — müşteri sitede görecek");
+  if(ok){delete S.qdraft[id];}
   return ok;
 }
-async function qSend(id,kind){
-  var q=S.q[id],t=$("#qa-"+id),ans=t?t.value.trim():"";if(!q)return;
-  if(!ans){toast("Önce yanıtınızı yazın",true);if(t)t.focus();return;}
-  var store=setting("name"),c=qContact(q.contact);
-  var body="Merhaba "+q.name.split(" ")[0]+",\n\n"+(q.productName?q.productName+" hakkındaki sorunuz":"Sorunuz")+":\n“"+q.question+"”\n\n"+ans+"\n\nSevgilerle,\n"+store;
-  // önce pencereyi aç (tarayıcı engellemesin), sonra yanıtı kaydet
+function qNotify(id,kind){
+  var q=S.q[id];if(!q)return;
+  var store=setting("name"),c=qContact(q.contact),link=qLink(q);
+  var body="Merhaba "+q.name.split(" ")[0]+",\n\n"+(q.productName?q.productName+" hakkındaki":"Sitemizden gönderdiğiniz")+" sorunuzu yanıtladık. Yanıtı görmek ve bize yazmak için:\n"+link+"\n\nSevgilerle,\n"+store;
   if(kind==="wa")window.open("https://wa.me/"+c.wa+"?text="+encodeURIComponent(body),"_blank","noopener");
-  else location.href="mailto:"+q.contact+"?subject="+encodeURIComponent(store+" — sorunuzun yanıtı")+"&body="+encodeURIComponent(body);
-  if(ans!==q.answer)await qSave(id);
+  else location.href="mailto:"+q.contact+"?subject="+encodeURIComponent(store+" — sorunuz yanıtlandı")+"&body="+encodeURIComponent(body);
 }
+async function qCopy(id){var q=S.q[id];if(!q)return;try{await navigator.clipboard.writeText(qLink(q));toast("Müşteriye özel bağlantı kopyalandı");}catch(x){toast(qLink(q));}}
 
 /* ===== kullanıcılar (yalnız yönetici) ===== */
 function loadUsers(){return db.users().then(function(u){S.users=u;if(S.view==="kullanicilar")render();},function(e){toast(errMsg(e),true);});}
@@ -659,6 +678,21 @@ async function savePw(){
   if(ok)closeModal();
 }
 
+/* ===== KDV yardımcıları ===== */
+var VATS=[1,10,20,0];
+function r2(n){return Math.round(n*100)/100;}
+function grossOf(net,v){return r2(net*(1+v/100));}
+function netOf(g,v){return r2(g/(1+v/100));}
+/* KDV hariç ↔ KDV dahil alanlarını birbirine bağla; hangisi yazılırsa diğeri hesaplanır */
+function syncPrice(src){
+  var n=$("#pf-net"),g=$("#pf-gross"),v=$("#pf-vat"),h=$("#priceHint");if(!n||!g||!v)return;
+  var rate=+v.value;
+  if(src==="gross"){var gv2=num(g.value);n.value=gv2>0?String(netOf(gv2,rate)).replace(".",","):"";}
+  else{var nv=num(n.value);g.value=nv>0?String(grossOf(nv,rate)).replace(".",","):"";}
+  var net=num(n.value),gross=grossOf(net,rate),on=num(($("#pf-oldnet")||{}).value);
+  h.innerHTML=net>0?'Müşteri <b>'+TL(gross)+'</b> görür (KDV hariç '+TL(net)+' + %'+rate+' KDV '+TL(r2(gross-net))+')'+(on>net?' · indirim öncesi <s>'+TL(grossOf(on,rate))+'</s>':''):'KDV hariç fiyatı girin; KDV dahil fiyat otomatik hesaplanır. İsterseniz KDV dahil fiyatı yazın, KDV hariç fiyat hesaplanır.';
+}
+
 /* ===== kuponlar ===== */
 function viewCoupons(){
   var cs=Object.keys(S.c).map(function(k){return S.c[k];}).sort(function(a,b){return a.code.localeCompare(b.code);});
@@ -673,12 +707,12 @@ function viewSettings(){
   var s=S.set;
   return '<div class="phead"><div><h1>Ayarlar</h1><p>Mağaza bilgileri ve teslimat ücretleri.</p></div></div><form id="sForm" novalidate>'+
    '<div class="box" style="margin-bottom:18px"><h3>Mağaza bilgileri</h3><div class="bp"><div class="fg">'+fld("st-name","Mağaza adı",setting("name"),"text")+fld("st-phone","Telefon",s.phone||"","tel",'autocomplete="off"')+fld("st-email","E-posta",s.email||"","email",'autocomplete="off"')+fld("st-wa","WhatsApp numarası (905xxxxxxxxx)",s.whatsapp||"","text",'inputmode="numeric" autocomplete="off"')+fld("st-iban","IBAN (havale / EFT için)",s.iban||"","text",'autocomplete="off"')+'<div class="full">'+fld("st-addr","Adres",s.address||"","text",'autocomplete="off"')+'</div><div class="full">'+fld("st-hours","Çalışma saatleri",s.hours||"","text",'autocomplete="off"')+'</div></div></div></div>'+
-   '<div class="box" style="margin-bottom:18px"><h3>Kargo ve ödeme ücretleri</h3><div class="bp"><div class="fg">'+fld("st-free","Ücretsiz kargo eşiği (₺)",setting("freeAt"),"text",'inputmode="decimal"')+fld("st-ship","Standart kargo (₺)",setting("ship"),"text",'inputmode="decimal"')+fld("st-fast","Hızlı teslimat (₺)",setting("fast"),"text",'inputmode="decimal"')+fld("st-cod","Kapıda ödeme bedeli (₺)",setting("cod"),"text",'inputmode="decimal"')+fld("st-low","Düşük stok uyarı sınırı (adet)",setting("lowStock"),"text",'inputmode="numeric"')+'</div></div></div>'+
+   '<div class="box" style="margin-bottom:18px"><h3>Kargo ve ödeme ücretleri</h3><div class="bp"><div class="fg">'+fld("st-free","Ücretsiz kargo eşiği (₺)",setting("freeAt"),"text",'inputmode="decimal"')+fld("st-ship","Standart kargo (₺)",setting("ship"),"text",'inputmode="decimal"')+fld("st-fast","Hızlı teslimat (₺)",setting("fast"),"text",'inputmode="decimal"')+fld("st-cod","Kapıda ödeme bedeli (₺)",setting("cod"),"text",'inputmode="decimal"')+'<div class="fld"><label for="st-svat">Kargo ve kapıda ödeme KDV oranı</label><select id="st-svat">'+[20,10,1,0].map(function(v){return '<option value="'+v+'"'+(+setting("shipVat")===v?' selected':'')+'>%'+v+'</option>';}).join("")+'</select></div>'+fld("st-low","Düşük stok uyarı sınırı (adet)",setting("lowStock"),"text",'inputmode="numeric"')+'</div></div></div>'+
    '<button class="btn" type="submit">Ayarları kaydet</button></form>'+
    '<div class="box" style="margin-top:18px"><h3>Yedekleme</h3><div class="bp"><p class="muted" style="margin-bottom:12px;max-width:62ch">Siparişler, ürünler ve ayarlar mağaza veritabanında saklanır. İsterseniz buradan bir kopya indirebilirsiniz. Yedekten geri yükleme mevcut tüm verinin yerine geçer.</p><div class="acts"><button class="btn" type="button" data-act="backup">Yedek al (JSON)</button><button class="btn ghost" type="button" data-act="restore">Yedekten geri yükle</button></div><input type="file" id="restoreFile" accept=".json,application/json" class="sr" tabindex="-1" aria-label="Yedek dosyası seç"></div></div>';
 }
 async function saveSettings(){
-  var doc={name:gv("st-name")||DEF.name,phone:gv("st-phone"),email:gv("st-email"),whatsapp:gv("st-wa").replace(/\D/g,""),address:gv("st-addr"),hours:gv("st-hours"),iban:gv("st-iban"),freeAt:num(gv("st-free")),ship:num(gv("st-ship")),fast:num(gv("st-fast")),cod:num(gv("st-cod")),lowStock:Math.floor(num(gv("st-low")))};
+  var doc={name:gv("st-name")||DEF.name,phone:gv("st-phone"),email:gv("st-email"),whatsapp:gv("st-wa").replace(/\D/g,""),address:gv("st-addr"),hours:gv("st-hours"),iban:gv("st-iban"),freeAt:num(gv("st-free")),ship:num(gv("st-ship")),fast:num(gv("st-fast")),cod:num(gv("st-cod")),shipVat:+$("#st-svat").value,lowStock:Math.floor(num(gv("st-low")))};
   await w(function(){return db.doc("settings/store").set(doc);},"Ayarlar kaydedildi");
 }
 
@@ -748,8 +782,8 @@ async function saveFile(name,data,type){
 }
 function csvCell(v){v=String(v==null?"":v);return /[;"\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
 function exportOrders(){
-  var rows=[["Sipariş no","Tarih","Durum","Müşteri","Telefon","İl","İlçe","Adres","Ürünler","Ara toplam","İndirim","Teslimat","Ek bedel","Toplam","Ödeme","Kargo firması","Takip no"]];
-  olist().forEach(function(o){var c=o.customer||{},g=o.cargo||{};rows.push([o.no,new Date(o.createdAt).toLocaleString("tr-TR"),(STK[o.status]||{}).l,c.name,c.phone,c.city,c.dist,c.addr,(o.items||[]).map(function(i){return i.qty+"x "+i.name;}).join(" | "),o.sub,o.disc,o.ship,o.fee,o.total,o.pay==="eft"?"Havale / EFT":"Kapıda ödeme",g.firm,g.track]);});
+  var rows=[["Sipariş no","Tarih","Durum","Müşteri","Telefon","İl","İlçe","Adres","Ürünler","Ara toplam","İndirim","Teslimat","Ek bedel","Toplam (KDV dahil)","KDV","Ödeme","Kargo firması","Takip no"]];
+  olist().forEach(function(o){var c=o.customer||{},g=o.cargo||{};rows.push([o.no,new Date(o.createdAt).toLocaleString("tr-TR"),(STK[o.status]||{}).l,c.name,c.phone,c.city,c.dist,c.addr,(o.items||[]).map(function(i){return i.qty+"x "+i.name;}).join(" | "),o.sub,o.disc,o.ship,o.fee,o.total,o.vatTotal||0,o.pay==="eft"?"Havale / EFT":"Kapıda ödeme",g.firm,g.track]);});
   saveFile("siparisler.csv","﻿"+rows.map(function(r){return r.map(csvCell).join(";");}).join("\r\n"),"text/csv;charset=utf-8");
 }
 function exportProducts(){
@@ -803,8 +837,9 @@ document.addEventListener("click",async function(e){
   else if(a==="retryBoot")boot();
   else if(a==="myPassword")openPwModal("mine");
   else if(a==="qf"){S.qf=el.dataset.k;render();}
-  else if(a==="qSave")qSave(+id);
-  else if(a==="qSend")qSend(+id,el.dataset.k);
+  else if(a==="qSend")qSend(+id);
+  else if(a==="qNotify")qNotify(+id,el.dataset.k);
+  else if(a==="qCopy")qCopy(+id);
   else if(a==="qDel")arm(el,function(){w(function(){return db.doc("questions/"+id).delete();},"Soru silindi");});
   else if(a==="uReset")openPwModal("reset",+id);
   else if(a==="uDel")arm(el,function(){w(function(){return db.userDelete(+id);},"Kullanıcı silindi").then(function(ok){if(ok)loadUsers();});});
@@ -816,12 +851,14 @@ document.addEventListener("change",function(e){
   else if(k==="uactive"){var uid=+el.dataset.id;w(function(){return db.userPatch(uid,{active:el.checked});},el.checked?"Kullanıcı aktif":"Kullanıcı pasife alındı, oturumu kapatıldı").then(function(){loadUsers();});}
   else if(k==="urole"){var uid2=+el.dataset.id;w(function(){return db.userPatch(uid2,{role:el.value});},"Rol güncellendi").then(function(){loadUsers();});}
   else if(k==="cactive"){var cid=el.dataset.id;w(function(){return db.doc("coupons/"+cid).update({active:el.checked});});}
+  else if(el.id==="pf-vat"){syncPrice("net");}
   else if(k==="pcat"){S.pcat=el.value;renderList();}
   else if(el.name==="dlv"&&M){M.dlv=el.value;M.ship=null;refreshTotals();}
   else if(el.name==="pay"&&M){M.pay=el.value;M.fee=null;refreshTotals();}
 });
 document.addEventListener("input",function(e){
   var el=e.target,k=el.dataset&&el.dataset.in;
+  if(el.dataset&&el.dataset.price){syncPrice(el.dataset.price==="gross"?"gross":"net");return;}
   if(el.dataset&&el.dataset.qa){S.qdraft[el.dataset.qa]=el.value;return;}
   if(k==="oq"){S.oq=el.value;renderList();}
   else if(k==="pq"){S.pq=el.value;renderList();}
@@ -874,9 +911,10 @@ function makeApiDb(){
   async function refresh(){
     var d=await call("GET","/api/admin/data");
     data.products=idx(d.products,"id");data.orders=idx(d.orders,"id");data.coupons=idx(d.coupons,"code");data.settings={store:d.settings||{}};data.questions=idx(d.questions,"id");
-    var qopen=(d.questions||[]).filter(function(q){return !q.answer;});
-    if(lastQ){var nq=qopen.filter(function(q){return !lastQ[q.id];});if(nq.length)toast(nq.length===1?"Yeni soru: "+nq[0].name+(nq[0].productName?" · "+nq[0].productName:""):nq.length+" yeni soru geldi");}
-    lastQ={};qopen.forEach(function(q){lastQ[q.id]=1;});
+    var qopen=(d.questions||[]).filter(function(q){return q.lastFrom!=="satici";});
+    // yeni soru ya da müşteriden yeni mesaj geldiyse bildir
+    if(lastQ){var nq=qopen.filter(function(q){return !lastQ[q.id]||lastQ[q.id]<q.lastAt;});if(nq.length)toast(nq.length===1?(nq[0].messages&&nq[0].messages.length?"Yeni mesaj: ":"Yeni soru: ")+nq[0].name+(nq[0].productName?" · "+nq[0].productName:""):nq.length+" yeni soru/mesaj geldi");}
+    lastQ={};qopen.forEach(function(q){lastQ[q.id]=q.lastAt;});
     var fresh=d.orders.filter(function(o){return o.status==="yeni";});
     if(lastNew){var nw=fresh.filter(function(o){return !lastNew[o.id]&&o.source==="web";});if(nw.length)toast(nw.length===1?"Yeni sipariş geldi: "+nw[0].no:nw.length+" yeni sipariş geldi");}
     lastNew={};fresh.forEach(function(o){lastNew[o.id]=1;});
@@ -913,6 +951,7 @@ function makeApiDb(){
     userPatch:function(id,p){return call("PATCH","/api/admin/users/"+id,p);},
     userDelete:function(id){return call("DELETE","/api/admin/users/"+id);},
     myPassword:function(cur,next){return call("POST","/api/admin/password",{current:cur,next:next});},
+    qReply:function(id,body){return after(call("POST","/api/admin/questions/"+id,{body:body}));},
     stock:function(id,delta){return after(call("POST","/api/admin/stock/"+encodeURIComponent(id),{delta:delta}));},
     exportAll:function(){return JSON.stringify({app:"kafulluk-satici",version:2,exportedAt:new Date().toISOString(),data:data},null,2);},
     importAll:function(o){var d=o&&o.data;if(!d||!d.products||!d.orders)return Promise.reject({code:"api",message:"Bu dosya geçerli bir yedek değil."});return after(call("POST","/api/admin/import",{data:d}));},

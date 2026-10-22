@@ -50,6 +50,14 @@ const pick = (a) => a[Math.floor(rnd() * a.length)];
 const int = (a, b) => a + Math.floor(rnd() * (b - a + 1));
 const chance = (p) => rnd() < p;
 const round2 = (n) => Math.round(n * 100) / 100;
+// uygulamadaki orderVat ile aynı: kupon satırlara orantılı, kargo/ek bedel shipVat ile
+const vatTotal = (items, sub, disc, extras, shipVat) => {
+  const k = sub > 0 ? (sub - disc) / sub : 1;
+  const vin = (g, r) => g - g / (1 + r / 100);
+  return round2(
+    items.reduce((a, i) => a + vin(i.price * i.qty * k, i.vat), 0) + vin(extras, shipVat),
+  );
+};
 
 /* ---------- şifre özeti: uygulamadaki ile aynı biçim ---------- */
 const b64url = (b) => Buffer.from(b).toString("base64url");
@@ -212,9 +220,10 @@ async function main() {
         VALUES (${p.id}, ${p.cat}, ${p.name}, ${p.w}, ${p.price}, ${p.old || 0}, ${p.type}, ${p.c1}, ${p.c2}, ${p.origin},
                 ${p.desc}, ${p.store}, ${p.inc ?? null}, ${p.stock}, ${p.active}, ${p.sort})`;
     }
+    await sql`UPDATE products SET net_price = round(price / (1 + vat / 100.0), 2) WHERE net_price IS NULL`;
   }
   const products =
-    await sql`SELECT id, name, w, price, cat, inc FROM products WHERE active ORDER BY sort`;
+    await sql`SELECT id, name, w, price, cat, inc, vat FROM products WHERE active ORDER BY sort`;
   if (!products.length) throw new Error("Satışta ürün yok.");
 
   /* ---------- ayarlar: yalnızca boş alanları doldur ---------- */
@@ -316,6 +325,7 @@ async function main() {
         name: p.name,
         w: p.w,
         price: p.price,
+        vat: p.vat,
         qty: Math.min(3, (lines.get(p.id)?.qty ?? 0) + pick([1, 1, 1, 2])),
       });
     }
@@ -345,15 +355,16 @@ async function main() {
     const [{ no }] = await sql`SELECT 'KG-' || nextval('order_no_seq') AS no`;
     await sql`
       INSERT INTO orders (id, no, created_at, status, status_at, customer, sub, disc, ship, fee, total, pay, dlv, coupon,
-                          cargo, note, stock_applied, source, sample, status_by, created_by)
+                          cargo, note, stock_applied, source, sample, status_by, created_by, vat_total)
       VALUES (${id}, ${no}, ${created}, ${status}, ${statusAt},
               ${sql.json({ ...c, note: pick(NOTES) })}, ${sub}, ${disc}, ${ship}, ${fee}, ${total}, ${pay}, ${dlv}, ${coupon},
               ${sql.json(shipped ? { firm: pick(CARGO), track: String(int(100000, 999999)) + String(int(100000, 999999)) } : { firm: "", track: "" })},
               ${status === "iptal" ? pick(["Müşteri vazgeçti.", "Adrese ulaşılamadı.", "Havale gelmedi."]) : ""},
-              false, ${source}, true, ${status === "yeni" ? null : staffUser}, ${source === "panel" ? staffUser : null})`;
+              false, ${source}, true, ${status === "yeni" ? null : staffUser}, ${source === "panel" ? staffUser : null},
+              ${vatTotal(items, sub, disc, ship + fee, +(S.shipVat ?? 20))})`;
     let line = 0;
     for (const l of items) {
-      await sql`INSERT INTO order_items (order_id, line, pid, name, w, price, qty) VALUES (${id}, ${line++}, ${l.pid}, ${l.name}, ${l.w}, ${l.price}, ${l.qty})`;
+      await sql`INSERT INTO order_items (order_id, line, pid, name, w, price, qty, vat) VALUES (${id}, ${line++}, ${l.pid}, ${l.name}, ${l.w}, ${l.price}, ${l.qty}, ${l.vat})`;
       if (status !== "iptal")
         await sql`INSERT INTO stock_moves (pid, delta, reason, order_id, actor, created_at)
                   VALUES (${l.pid}, ${-l.qty}, ${source === "web" ? "web-siparis" : "panel-siparis"}, ${id}, ${source === "panel" ? staffUser : null}, ${created})`;
