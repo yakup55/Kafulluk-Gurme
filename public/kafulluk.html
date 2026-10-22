@@ -327,6 +327,11 @@ legend{font-family:var(--f-display);font-weight:700;font-size:19px;margin-bottom
 .done .ok{width:68px;height:68px;border-radius:50%;background:linear-gradient(135deg,#7BD39A,#2E7D3F);color:#fff;display:grid;place-items:center;margin:0 auto 18px;box-shadow:0 0 0 10px rgba(123,211,154,.12)}
 .done .ok svg{width:34px;height:34px}
 .done h2{font-size:34px;margin-bottom:8px;padding:0}
+.badge.out{background:#3a3a3a;color:#fff;box-shadow:none}
+.add:disabled{background:var(--surface);color:var(--muted);border:1px solid var(--line);cursor:not-allowed}
+.few{display:block;font-size:12.5px;font-weight:600;color:var(--err);margin-top:6px}
+#coErr{color:var(--err);font-size:14px;font-weight:600}
+.eft{display:grid;gap:4px;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-top:16px;font-size:14.5px}
 .done pre{text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;font:13.5px/1.55 var(--f-body);white-space:pre-wrap;margin:18px 0;overflow-x:auto;color:var(--ink)}
 .done .acts{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
 
@@ -417,7 +422,7 @@ go(0);})();
   <div class="wrap">
     <div class="marquee" id="marquee" aria-hidden="true"></div>
     <div class="trust" aria-label="Avantajlar">
-      <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/></svg>750 ₺ üzeri ücretsiz kargo</div>
+      <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/></svg><span id="trustFree">Ücretsiz kargo fırsatı</span></div>
       <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8l8-4 8 4v8l-8 4-8-4zM4 8l8 4 8-4M12 12v8"/></svg>Siparişler özenle paketlenir</div>
       <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/></svg>Kapıda ödeme veya havale</div>
       <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c-5-3-8-7-8-11a8 8 0 0 1 16 0c0 4-3 8-8 11z"/><circle cx="12" cy="10" r="2.5"/></svg>Yöresel üretici seçkisi</div>
@@ -460,11 +465,11 @@ go(0);})();
     <section id="sss" aria-labelledby="h-sss">
       <div class="sec-head"><h2 id="h-sss">Sık sorulanlar</h2></div>
       <div class="faq">
-        <details><summary>Kargo ücreti ne kadar?</summary><p>750 ₺ ve üzeri siparişlerde kargo ücretsizdir. Altındaki siparişlerde standart teslimat 59,90 ₺, gün içi hızlı teslimat 99,90 ₺'dir.</p></details>
+        <details><summary>Kargo ücreti ne kadar?</summary><p id="faqShip"></p></details>
         <details><summary>Peynir ve şarküteri ürünleri nasıl saklanmalı?</summary><p>Peynir, kaymak ve şarküteri ürünlerini teslim aldığınızda buzdolabına koyun. Her ürünün saklama bilgisi ürün sayfasında yazar.</p></details>
-        <details><summary>Hangi ödeme yöntemlerini kullanabilirim?</summary><p>Kapıda ödeme (19,90 ₺ hizmet bedeli) ve havale / EFT ile ödeyebilirsiniz.</p></details>
-        <details><summary>Kupon kodunu nasıl kullanırım?</summary><p>Sepetinizi açın, kupon alanına KAHVALTI10 yazın ve uygula düğmesine basın. Kupon sepet tutarına %10 indirim sağlar.</p></details>
-        <details><summary>Siparişimi nasıl takip ederim?</summary><p>Sipariş tamamlandığında bir sipariş numarası alırsınız. Bu numarayla mağaza ekibimizden sipariş durumunu öğrenebilirsiniz.</p></details>
+        <details><summary>Hangi ödeme yöntemlerini kullanabilirim?</summary><p id="faqPay"></p></details>
+        <details><summary>Kupon kodunu nasıl kullanırım?</summary><p>Sepetinizi açın, kupon alanına kodunuzu yazın ve Uygula düğmesine basın. İndirim sipariş özetinde görünür.</p></details>
+        <details><summary>Siparişimi nasıl takip ederim?</summary><p>Sipariş tamamlandığında bir sipariş numarası alırsınız. Bu numarayla mağaza ekibimizden sipariş durumunu ve kargo takip numaranızı öğrenebilirsiniz.</p></details>
       </div>
     </section>
   </div>
@@ -508,45 +513,17 @@ var ART={
  box:function(a,b){return '<svg viewBox="0 0 200 200" aria-hidden="true"><ellipse cx="100" cy="184" rx="80" ry="7" fill="#000" opacity=".14"/><rect x="30" y="94" width="140" height="86" rx="8" fill="'+a+'"/><rect x="24" y="68" width="152" height="32" rx="7" fill="'+b+'"/><rect x="92" y="68" width="16" height="112" fill="#fff" opacity=".55"/><path d="M100 68c-14-26-42-24-35-9 4 9 24 9 35 9zM100 68c14-26 42-24 35-9-4 9-24 9-35 9z" fill="#fff" opacity=".85"/></svg>';}
 };
 
-/* ---------- ürün verisi ---------- */
-var CATS=["Bal & Pekmez","Reçel & Marmelat","Peynir & Kaymak","Zeytin & Zeytinyağı","Şarküteri","Ezme & Helva","Çay & Kahve","Granola & Kuru Meyve","Kahvaltı Setleri"];
-var P=[];
-function p(id,cat,name,w,price,old,type,c1,c2,origin,desc,store,inc){P.push({id:id,cat:cat,name:name,w:w,price:price,old:old||0,type:type,c1:c1,c2:c2,origin:origin,desc:desc,store:store,inc:inc||null});}
-var DRY="Serin ve kuru yerde saklayın. Açıldıktan sonra kapağını sıkıca kapatın.";
-var FRIDGE="Buzdolabında (+4 °C) saklayın.";
-p("bal-cicek","Bal & Pekmez","Süzme Çiçek Balı","450 g",289,349,"jar","#E3A21A","#7A4B00","Anadolu","Yayla çiçeklerinden süzülmüş, akışkan ve hafif aromalı bal.",DRY);
-p("bal-cam","Bal & Pekmez","Muğla Çam Balı","850 g",599,0,"jar","#9A5A12","#3F2400","Muğla","Koyu renkli, yoğun ve hafif reçineli tadıyla kahvaltının klasiği.",DRY);
-p("bal-petek","Bal & Pekmez","Karakovan Petek Bal","500 g",849,0,"jar","#F0B323","#6B4200","Artvin","Peteğiyle birlikte sunulan, işlenmemiş karakovan balı.",DRY);
-p("bal-pekmez","Bal & Pekmez","Taş Üzüm Pekmezi","700 g",229,0,"jar","#4A2A22","#2A140F","Ege","Tahinle karıştırmaya hazır, koyu ve yoğun üzüm pekmezi.",DRY);
-p("rec-cilek","Reçel & Marmelat","Çilek Reçeli","380 g",139,0,"jar","#C2263F","#6E0F20","Bursa","Bütün çilek taneli, az şekerli klasik reçel.",DRY);
-p("rec-kayisi","Reçel & Marmelat","Kayısı Marmelatı","380 g",129,149,"jar","#F08A24","#8A4300","Malatya","Malatya kayısısından, kalın dilimli ve ekşimsi marmelat.",DRY);
-p("rec-gul","Reçel & Marmelat","Gül Reçeli","350 g",169,0,"jar","#D4577A","#7A1F3E","Isparta","Isparta gülü yapraklarından, kokusu belirgin bir reçel.",DRY);
-p("rec-incir","Reçel & Marmelat","Bütün İncir Reçeli","380 g",159,0,"jar","#7A4A5E","#3E1F2E","Aydın","Bütün incirlerle kaynatılmış, çıtır çekirdekli reçel.",DRY);
-p("pey-ezine","Peynir & Kaymak","Ezine Beyaz Peynir","500 g",329,0,"cheese","#F6EBC8","#CDB878","Çanakkale","Tuzu dengeli, tam yağlı ve dilimlenebilir beyaz peynir.",FRIDGE);
-p("pey-kasar","Peynir & Kaymak","Eski Kaşar Peyniri","400 g",289,0,"cheese","#F2C94C","#B58A12","Kars","Olgunlaşmış, hafif sert ve yoğun lezzetli kaşar.",FRIDGE);
-p("pey-tulum","Peynir & Kaymak","Erzincan Tulum Peyniri","350 g",379,419,"cheese","#EADFC0","#A99A6A","Erzincan","Mağarada olgunlaşan, ufalanan yapıda, keskin aromalı peynir.",FRIDGE);
-p("pey-kaymak","Peynir & Kaymak","Afyon Kaymağı","200 g",179,0,"tub","#FFF3D0","#C9A24B","Afyon","Manda sütünden, bal ile en güzel giden kalın kaymak.",FRIDGE);
-p("zey-siyah","Zeytin & Zeytinyağı","Gemlik Siyah Zeytin","500 g",199,0,"olives","#2B2128","#6B7F2A","Bursa","Tuzlu salamurada olgunlaşmış, yağlı ve etli sofralık zeytin.",FRIDGE);
-p("zey-yesil","Zeytin & Zeytinyağı","Çizik Yeşil Zeytin","500 g",179,0,"olives","#8FA33A","#4C5A18","Edremit","Çıtır yapılı, limonlu ve hafif acımsı yeşil zeytin.",FRIDGE);
-p("zey-yag","Zeytin & Zeytinyağı","Naturel Sızma Zeytinyağı","750 ml",649,729,"bottle","#8A9A2E","#3B4A0C","Ayvalık","Soğuk sıkım, düşük asitli, meyvemsi aromalı zeytinyağı.","Işıktan uzak, serin yerde saklayın.");
-p("sar-sucuk","Şarküteri","Kayseri Sucuğu","250 g",289,0,"sausage","#7B2D26","#E8C9A0","Kayseri","Dana etinden, baharatı dengeli, dilimlenmiş fırın sucuğu.",FRIDGE);
-p("sar-fume","Şarküteri","Dana Füme","150 g",169,0,"sausage","#B5543A","#F0D3B0","Kayseri","İnce dilimlenmiş, hafif dumanlı dana füme.",FRIDGE);
-p("sar-pastirma","Şarküteri","Kayseri Pastırması","150 g",259,0,"sausage","#8C2F2F","#E4C28A","Kayseri","Çemenli, el yapımı dana pastırma, ince dilimli.",FRIDGE);
-p("ezm-tahin","Ezme & Helva","Çifte Kavrulmuş Tahin","454 g",189,0,"tub","#D9B36A","#7A5A1E","Gaziantep","Pekmezle karıştırmaya uygun, pürüzsüz susam tahini.",DRY);
-p("ezm-fistik","Ezme & Helva","Şekersiz Fıstık Ezmesi","340 g",219,0,"tub","#C48A4A","#6B3F12","Osmaniye","Sadece kavrulmuş yer fıstığı ve bir tutam tuzla yapılır.",DRY);
-p("ezm-findik","Ezme & Helva","Fındık Kreması","350 g",199,0,"tub","#7A4E32","#3B2010","Giresun","Giresun fındığı oranı yüksek, sürülebilir fındık kreması.",DRY);
-p("ezm-helva","Ezme & Helva","Tahin Helvası","400 g",169,0,"tub","#E7CF98","#9A7A2E","Gaziantep","Dilimlenebilir, bol susamlı klasik tahin helvası.",DRY);
-p("cay-rize","Çay & Kahve","Rize Siyah Çay","500 g",179,0,"pack","#8A1F1F","#E8C25A","Rize","Tavşan kanı demlenen, dengeli içimli ince yapraklı çay.",DRY);
-p("cay-kahve","Çay & Kahve","Türk Kahvesi","250 g",199,0,"pack","#4A2C1E","#C9A24B","İstanbul","Taze kavrulmuş, ince çekilmiş, köpüğü bol Türk kahvesi.",DRY);
-p("cay-bitki","Çay & Kahve","Kuşburnu & Ihlamur Karışımı","100 g",119,0,"pack","#C0573E","#F0D28A","Anadolu","Kahvaltı sonrası için sıcak içilen bitki çayı karışımı.",DRY);
-p("gra-granola","Granola & Kuru Meyve","Fındıklı Bal Granola","400 g",189,0,"pack","#D1A15A","#6B4200","Giresun","Yulaf, fındık ve bal ile fırınlanmış çıtır granola.",DRY);
-p("gra-kayisi","Granola & Kuru Meyve","Gün Kurusu Kayısı","500 g",249,0,"pack","#F08A24","#7A3E00","Malatya","Sülfürsüz, doğal kurutulmuş Malatya kayısısı.",DRY);
-p("gra-incir","Granola & Kuru Meyve","Aydın Kuru İncir","400 g",169,0,"pack","#8A6B4A","#3E2A14","Aydın","Yumuşak ve tatlı, kahvaltılık tabaklar için kuru incir.",DRY);
-p("set-pazar","Kahvaltı Setleri","Pazar Kahvaltı Sepeti","4 ürün",899,0,"box","#2F4A33","#F0B323","Karma","Pazar sabahı için bal, reçel, peynir ve zeytin bir arada.",DRY+" Peynir ve zeytini buzdolabında saklayın.",["bal-cicek","rec-cilek","pey-ezine","zey-siyah"]);
-p("set-hediye","Kahvaltı Setleri","Gurme Hediye Kutusu","5 ürün",1190,0,"box","#7A1F3E","#F0B323","Karma","Çam balı, gül reçeli, fındık kreması, Türk kahvesi ve helva. Hediye için ideal.",DRY,["bal-cam","rec-gul","ezm-findik","cay-kahve","ezm-helva"]);
-p("set-sabah","Kahvaltı Setleri","Sabah Başlangıç Seti","4 ürün",649,0,"box","#C2833A","#2F4A33","Karma","Granola, fıstık ezmesi, marmelat ve çay ile hızlı ve doyurucu bir sabah.",DRY,["gra-granola","ezm-fistik","rec-kayisi","cay-rize"]);
-var BY={};P.forEach(function(x){BY[x.id]=x;});
-P.forEach(function(x){ if(x.inc){ x.sum=x.inc.reduce(function(s,i){return s+BY[i].price;},0); x.old=x.sum; } });
+/* ---------- ürün verisi (sunucudan /api/store ile gelir) ---------- */
+var CAT_ORDER=["Bal & Pekmez","Reçel & Marmelat","Peynir & Kaymak","Zeytin & Zeytinyağı","Şarküteri","Ezme & Helva","Çay & Kahve","Granola & Kuru Meyve","Kahvaltı Setleri"];
+var CATS=[],P=[],BY={};
+function setProducts(list){
+  P=(list||[]).map(function(x){return {id:x.id,cat:x.cat,name:x.name,w:x.w||"",price:+x.price,old:+x.old||0,type:ART[x.type]?x.type:"jar",c1:x.c1,c2:x.c2,origin:x.origin||"",desc:x.desc||"",store:x.store||"",img:x.img||"",inc:x.inc&&x.inc.length?x.inc.slice():null,stock:Math.max(0,+x.stock||0)};});
+  BY={};P.forEach(function(x){BY[x.id]=x;if(x.img)IMG[x.id]=x.img;});
+  P.forEach(function(x){ if(x.inc){ x.inc=x.inc.filter(function(i){return BY[i];}); x.sum=x.inc.reduce(function(s,i){return s+BY[i].price;},0); if(x.sum>x.price)x.old=x.sum; } });
+  var seen={};P.forEach(function(x){seen[x.cat]=1;});
+  CATS=CAT_ORDER.filter(function(c){return seen[c];});Object.keys(seen).forEach(function(c){if(CATS.indexOf(c)<0)CATS.push(c);});
+}
+function maxQty(x){return Math.min(20,x?x.stock:0);}
 
 /* ---------- yardımcılar ---------- */
 var $=function(s,r){return (r||document).querySelector(s);};
@@ -556,9 +533,17 @@ function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&am
 function lsGet(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 /* ---- Mağaza ayarları: kendi koşullarınıza göre düzenleyin ---- */
-var CONFIG={freeAt:750,ship:59.9,fast:99.9,cod:19.9,phone:"",email:"",address:"",hours:"",whatsapp:""}; /* whatsapp: ülke koduyla, örn. 905xxxxxxxxx */
+/* ---- Mağaza ayarları satıcı panelinden (Ayarlar) yönetilir; burası yalnızca ilk değerlerdir ---- */
+var CONFIG={freeAt:750,ship:59.9,fast:99.9,cod:19.9,phone:"",email:"",address:"",hours:"",whatsapp:"",iban:""};
 var FREE_AT=CONFIG.freeAt,SHIP=CONFIG.ship,FAST=CONFIG.fast,COD=CONFIG.cod;
-/* Ürün fotoğrafları: "urun-kodu":"dosya-yolu" biçiminde ekleyin. Örnek: "bal-cicek":"foto/bal-cicek.jpg" */
+function setConfig(st){Object.keys(st||{}).forEach(function(k){if(st[k]!==""&&st[k]!=null)CONFIG[k]=st[k];});FREE_AT=+CONFIG.freeAt;SHIP=+CONFIG.ship;FAST=+CONFIG.fast;COD=+CONFIG.cod;}
+async function api(path,body){
+  var r=await fetch(path,body?{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)}:{headers:{accept:"application/json"}});
+  var d=null;try{d=await r.json();}catch(e){}
+  if(!r.ok||!d||d.ok===false){var err=new Error((d&&d.error)||"Bağlantı sorunu. Lütfen tekrar deneyin.");err.status=r.status;err.data=d||{};throw err;}
+  return d;
+}
+/* Ürün fotoğrafları: satıcı panelinde ürünün "Fotoğraf adresi" alanından gelir */
 var IMG={};
 function vis(x){return IMG[x.id]?'<img class="pimg" data-id="'+x.id+'" src="'+esc(IMG[x.id])+'" alt="'+esc(x.name)+'" loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:8px;display:block">':ART[x.type](x.c1,x.c2);}
 document.addEventListener("error",function(e){var t=e.target;if(t&&t.classList&&t.classList.contains("pimg")){var x=BY[t.dataset.id];if(x){delete IMG[x.id];t.outerHTML=ART[x.type](x.c1,x.c2);}}},true);
@@ -567,7 +552,7 @@ var state={cat:"all",q:"",sort:"pop",price:"all",sale:false,fav:false};
 var cart=lsGet("kg-cart",{});
 var favs=lsGet("kg-favs",[]);
 var coupon=null;
-Object.keys(cart).forEach(function(k){if(!BY[k]||!(cart[k]>0))delete cart[k];});
+function cleanCart(){var changed=false;Object.keys(cart).forEach(function(k){var x=BY[k];if(!x||!(cart[k]>0)||x.stock<=0){delete cart[k];changed=true;}else if(cart[k]>maxQty(x)){cart[k]=maxQty(x);changed=true;}});if(changed)saveCart();return changed;}
 
 var ICON_PLUS='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
 var ICON_HEART='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>';
@@ -576,17 +561,18 @@ var ICON_HEART='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4
 $("#shelf").innerHTML=ART.jar("#B5651D","#4A2A00")+ART.bottle("#6B7F2A","#2D3A06")+ART.cheese("#FFF1C2","#C9A24B")+ART.olives("#2B2128","#6B7F2A");
 
 /* ---------- ürün kartları ---------- */
+function addBtn(x){return x.stock>0?'<button class="add" type="button" data-act="add" data-id="'+x.id+'" aria-label="'+esc(x.name)+' sepete ekle">'+ICON_PLUS+'Ekle</button>':'<button class="add" type="button" disabled aria-disabled="true">Tükendi</button>';}
 function priceHTML(x){return '<div class="price tnum">'+(x.old?'<s>'+TL(x.old)+'</s>':'')+TL(x.price)+'</div>';}
 function cardHTML(x,idx){
   var isFav=favs.indexOf(x.id)>-1;
-  var badge=x.inc?'<span class="badge set">Set</span>':(x.old?'<span class="badge">%'+Math.round((1-x.price/x.old)*100)+' indirim</span>':'');
+  var badge=x.stock<=0?'<span class="badge out">Tükendi</span>':x.inc?'<span class="badge set">Set</span>':(x.old?'<span class="badge">%'+Math.round((1-x.price/x.old)*100)+' indirim</span>':'');
   return '<article class="card" style="--i:'+Math.min(idx||0,11)+'"><div style="position:relative;--tint:'+x.c1+'">'+
     '<button class="tile" type="button" data-act="open" data-id="'+x.id+'" aria-label="'+esc(x.name)+' ayrıntıları" style="--tint:'+x.c1+'">'+vis(x)+'</button>'+badge+
     '<button class="fav" type="button" data-act="fav" data-id="'+x.id+'" aria-pressed="'+isFav+'" aria-label="'+esc(x.name)+' favorilere ekle">'+ICON_HEART+'</button></div>'+
     '<div class="cbody"><span class="ccat">'+esc(x.cat)+'</span>'+
     '<button class="cname" type="button" data-act="open" data-id="'+x.id+'">'+esc(x.name)+'</button>'+
     '<span class="cmeta">'+esc(x.w)+' · '+esc(x.origin)+'</span>'+
-    '<div class="cfoot">'+priceHTML(x)+'<button class="add" type="button" data-act="add" data-id="'+x.id+'" aria-label="'+esc(x.name)+' sepete ekle">'+ICON_PLUS+'Ekle</button></div></div></article>';
+    '<div class="cfoot">'+priceHTML(x)+addBtn(x)+'</div>'+(x.stock>0&&x.stock<=3?'<span class="few">Son '+x.stock+' adet</span>':'')+'</div></article>';
 }
 function filtered(){
   var q=state.q.trim().toLocaleLowerCase("tr");
@@ -617,18 +603,18 @@ function renderChips(){
 function renderSets(){
   $("#setGrid").innerHTML=P.filter(function(x){return x.inc;}).map(function(x){
     return '<article class="set"><div class="art" style="--tint:'+x.c1+'">'+ART.box(x.c1,x.c2)+'</div><div><h3>'+esc(x.name)+'</h3><ul>'+x.inc.map(function(i){return '<li>'+esc(BY[i].name)+' ('+esc(BY[i].w)+')</li>';}).join("")+'</ul>'+
-      '<span class="save tnum">Tek tek '+TL(x.sum)+' · '+TL(x.sum-x.price)+' tasarruf</span>'+
-      '<div class="cfoot">'+'<div class="price tnum">'+TL(x.price)+'</div><button class="add" type="button" data-act="add" data-id="'+x.id+'" aria-label="'+esc(x.name)+' sepete ekle">'+ICON_PLUS+'Ekle</button></div></div></article>';
+      (x.sum>x.price?'<span class="save tnum">Tek tek '+TL(x.sum)+' · '+TL(x.sum-x.price)+' tasarruf</span>':'')+
+      '<div class="cfoot">'+'<div class="price tnum">'+TL(x.price)+'</div>'+addBtn(x)+'</div></div></article>';
   }).join("");
   $("#footCats").innerHTML=CATS.map(function(c){return '<li><a href="#urunler" data-act="cat" data-cat="'+esc(c)+'">'+esc(c)+'</a></li>';}).join("");
 }
 
 /* ---------- sepet ---------- */
-function items(){return Object.keys(cart).map(function(id){return {p:BY[id],q:cart[id]};});}
+function items(){return Object.keys(cart).filter(function(id){return BY[id];}).map(function(id){return {p:BY[id],q:cart[id]};});}
 function calc(){
   var its=items(),sub=0,n=0;
   its.forEach(function(i){sub+=i.p.price*i.q;n+=i.q;});
-  var disc=coupon?Math.round(sub*coupon*100)/100:0;
+  var disc=coupon&&sub>=coupon.min?Math.round(sub*coupon.pct)/100:0;
   var after=sub-disc;
   var ship=its.length===0?0:(after>=FREE_AT?0:SHIP);
   return {its:its,n:n,sub:sub,disc:disc,after:after,ship:ship,total:after+ship};
@@ -653,11 +639,13 @@ function renderCart(){
       '<strong class="tnum">'+TL(i.p.price*i.q)+'</strong></div><button class="rm" type="button" data-act="rm" data-id="'+i.p.id+'">Kaldır</button></div></div>';
   });
   body.innerHTML=h;
-  foot.innerHTML='<div class="coupon"><label class="sr" for="cpn">Kupon kodu</label><input id="cpn" type="text" placeholder="Kupon kodu" autocomplete="off" value="'+(coupon?"KAHVALTI10":"")+'"><button type="button" data-act="coupon">Uygula</button></div><div class="msg'+(coupon?' ok':'')+'" id="cpnMsg" aria-live="polite">'+(coupon?'KAHVALTI10 uygulandı: %10 indirim.':'')+'</div>'+
+  foot.innerHTML='<div class="coupon"><label class="sr" for="cpn">Kupon kodu</label><input id="cpn" type="text" placeholder="Kupon kodu" autocomplete="off" value="'+(coupon?esc(coupon.code):"")+'"><button type="button" data-act="coupon">Uygula</button></div><div class="msg'+(coupon?' ok':'')+'" id="cpnMsg" aria-live="polite">'+(coupon?esc(coupon.code)+' uygulandı: %'+coupon.pct+' indirim.'+(c.sub<coupon.min?' (En az '+TL(coupon.min)+' sepette geçerli)':''):'')+'</div>'+
     '<div class="sum tnum"><div><span>Ara toplam</span><span>'+TL(c.sub)+'</span></div>'+(c.disc?'<div class="disc"><span>Kupon indirimi</span><span>−'+TL(c.disc)+'</span></div>':'')+'<div><span>Kargo</span><span>'+(c.ship?TL(c.ship):'Ücretsiz')+'</span></div><div class="tot"><span>Toplam</span><span>'+TL(c.total)+'</span></div></div>'+
     '<button class="btn block" type="button" data-act="checkout">Siparişi tamamla</button>';
 }
-function addItem(id,n){cart[id]=(cart[id]||0)+(n||1);if(cart[id]>20)cart[id]=20;saveCart();renderCart();var b=$("#cartCount");b.classList.remove("bump");void b.offsetWidth;b.classList.add("bump");}
+function addItem(id,n){var x=BY[id];if(!x||x.stock<=0){toast(x?x.name+" tükendi":"Ürün bulunamadı");return false;}
+  var want=(cart[id]||0)+(n||1),mx=maxQty(x);cart[id]=Math.min(want,mx);if(want>mx)toast("Bu üründen en fazla "+mx+" adet alabilirsiniz");saveCart();renderCart();var b=$("#cartCount");b.classList.remove("bump");void b.offsetWidth;b.classList.add("bump");return true;}
+window.addItem=function(id,n){if(addItem(id,n||1)&&BY[id])toast(BY[id].name+" sepete eklendi");};
 
 /* ---------- toast ---------- */
 var tt;function toast(m){var t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(tt);tt=setTimeout(function(){t.classList.remove("show");},2200);}
@@ -691,7 +679,7 @@ function openDetail(id){
    '<dl><dt>Miktar</dt><dd>'+esc(x.w)+'</dd><dt>Köken</dt><dd>'+esc(x.origin)+'</dd><dt>Saklama</dt><dd>'+esc(x.store)+'</dd></dl>'+
    '<div>'+priceHTML(x)+'</div>'+
    '<div class="buy"><div class="qty" role="group" aria-label="Adet"><button type="button" data-act="dq" data-d="-1" aria-label="Azalt">−</button><span class="tnum" id="dq">1</span><button type="button" data-act="dq" data-d="1" aria-label="Artır">+</button></div>'+
-   '<button class="btn" type="button" data-act="addDetail">Sepete ekle</button></div>'+relHTML(x)+'</div>';
+   (x.stock>0?'<button class="btn" type="button" data-act="addDetail">Sepete ekle</button>':'<button class="btn" type="button" disabled>Tükendi</button>')+'</div>'+(x.stock>0&&x.stock<=3?'<p class="few">Stokta son '+x.stock+' adet</p>':'')+relHTML(x)+'</div>';
   openModal("#detailModal");
 }
 
@@ -731,7 +719,7 @@ function openCheckout(){
    '<fieldset><legend>Ödeme yöntemi</legend>'+
     '<label class="opt"><input type="radio" name="pay" value="cod" checked><div><b>Kapıda ödeme</b><span>Teslimat sırasında nakit ya da kartla ödeyin</span></div><em class="tnum">+'+TL(COD)+'</em></label>'+
     '<label class="opt"><input type="radio" name="pay" value="eft"><div><b>Havale / EFT</b><span>Sipariş sonrası hesap bilgisi paylaşılır</span></div><em>Ücretsiz</em></label></fieldset>'+
-   '</div><aside class="aside"><h3>Sipariş özeti</h3><div id="coSum"></div><button class="btn block" type="submit" style="margin-top:16px">Siparişi onayla</button><p class="note">Kart bilgisi istenmez. Bu sayfa bir vitrin olduğu için onayladığınız sipariş bir mağaza sistemine gönderilmez; sipariş özeti ekranda oluşturulur.</p></aside></div></form>';
+   '</div><aside class="aside"><h3>Sipariş özeti</h3><div id="coSum"></div><button class="btn block" type="submit" style="margin-top:16px">Siparişi onayla</button><div class="e" id="coErr" role="alert" style="margin-top:10px"></div><p class="note">Kart bilgisi istenmez. Siparişiniz onayladığınız anda mağazaya iletilir ve ürünler sizin için ayrılır.</p></aside></div></form>';
   renderCoSummary();openModal("#coModal");
 }
 function setErr(id,msg){var w=$("#w-"+id);if(!w)return;w.classList.toggle("bad",!!msg);$("#e-"+id).textContent=msg||"";var i=$("#"+id);if(i)i.setAttribute("aria-invalid",msg?"true":"false");}
@@ -747,40 +735,65 @@ function validate(){
   if(first)$("#"+first).focus();
   return ok;
 }
-function placeOrder(){
+var sending=false;
+async function placeOrder(){
+  if(sending)return;
   var t=coTotals(),c=t.c;
-  var no="KG-"+String(Math.floor(100000+Math.random()*900000));
   var val=function(id){return ($("#"+id).value||"").trim();};
-  var lines=c.its.map(function(i){return i.q+" × "+i.p.name+" ("+i.p.w+") — "+TL(i.p.price*i.q);});
-  var txt="Sipariş no: "+no+"\n"+lines.join("\n")+"\n\nAra toplam: "+TL(c.sub)+(c.disc?"\nKupon indirimi: −"+TL(c.disc):"")+"\nTeslimat: "+(t.ship?TL(t.ship):"Ücretsiz")+(t.fee?"\nKapıda ödeme bedeli: "+TL(t.fee):"")+"\nToplam: "+TL(t.total)+
-    "\n\nÖdeme: "+(PAY==="cod"?"Kapıda ödeme":"Havale / EFT")+"\nTeslimat: "+(DLV==="fast"?"Hızlı":"Standart")+"\nAlıcı: "+val("f-name")+" · "+val("f-phone")+"\nAdres: "+val("f-addr")+", "+val("f-dist")+" / "+val("f-city");
+  var btn=$("#coForm button[type=submit]"),err=$("#coErr");
+  sending=true;if(btn){btn.disabled=true;btn.textContent="Gönderiliyor…";}if(err)err.textContent="";
+  var res;
+  try{
+    res=(await api("/api/orders",{customer:{name:val("f-name"),phone:val("f-phone"),email:val("f-email"),city:val("f-city"),dist:val("f-dist"),addr:val("f-addr"),note:val("f-note")},
+      items:c.its.map(function(i){return {id:i.p.id,qty:i.q};}),coupon:coupon?coupon.code:null,dlv:DLV,pay:PAY,expectedTotal:Math.round(t.total*100)/100})).order;
+  }catch(e){
+    sending=false;if(btn){btn.disabled=false;btn.textContent="Siparişi onayla";}
+    if(e.status===409||(e.data&&e.data.code==="coupon")){
+      if(e.data&&e.data.code==="coupon")coupon=null;
+      // stok ya da fiyat değişti: güncel veriyi çek, sepeti düzelt, özeti yenile
+      try{await loadStore();}catch(x){}
+      renderCoSummary();
+    }
+    if(err)err.textContent=e.message;else toast(e.message);
+    return;
+  }
+  sending=false;
+  var no=res.no;
+  var lines=res.items.map(function(i){return i.qty+" × "+i.name+" ("+i.w+") — "+TL(i.price*i.qty);});
+  var txt="Sipariş no: "+no+"\n"+lines.join("\n")+"\n\nAra toplam: "+TL(res.sub)+(res.disc?"\nKupon indirimi: −"+TL(res.disc):"")+"\nTeslimat: "+(res.ship?TL(res.ship):"Ücretsiz")+(res.fee?"\nKapıda ödeme bedeli: "+TL(res.fee):"")+"\nToplam: "+TL(res.total)+
+    "\n\nÖdeme: "+(res.pay==="cod"?"Kapıda ödeme":"Havale / EFT")+"\nTeslimat: "+(res.dlv==="fast"?"Hızlı":"Standart")+"\nAlıcı: "+val("f-name")+" · "+val("f-phone")+"\nAdres: "+val("f-addr")+", "+val("f-dist")+" / "+val("f-city");
+  var eft=res.pay==="eft"?'<div class="eft"><b>Havale / EFT bilgisi</b>'+(res.iban?'<span>'+esc(CONFIG.name||"Kafulluk Gurme")+'</span><span class="tnum">'+esc(res.iban)+'</span><span>Açıklama kısmına sipariş numaranızı (<b>'+esc(no)+'</b>) yazın. Ödeme ulaştığında siparişiniz hazırlanır.</span>':'<span>Hesap bilgisi kısa süre içinde telefon ya da e-posta ile iletilecek.</span>')+'</div>':'';
   $("#coPanel").className="panel done";
-  $("#coPanel").innerHTML='<button class="x" type="button" data-act="closeCo" aria-label="Kapat">'+XSVG+'</button><div class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></div><h2>Sipariş özetiniz hazır</h2>'+
-    '<p style="color:var(--muted)">Sipariş numaranız <b class="tnum" style="color:var(--ink)">'+no+'</b></p><pre id="orderTxt">'+esc(txt)+'</pre>'+
-    '<p class="note" style="margin-bottom:16px">Bu sayfa bir vitrin olduğundan sipariş bir mağaza sistemine iletilmedi. Özeti kopyalayıp mağaza ekibine gönderebilirsiniz.</p>'+
-    '<div class="acts">'+(CONFIG.whatsapp?'<a class="btn" target="_blank" rel="noopener" href="https://wa.me/'+String(CONFIG.whatsapp).replace(/\D/g,"")+'?text='+encodeURIComponent(txt)+'">WhatsApp ile gönder</a>':'')+'<button class="btn" type="button" data-act="copyOrder">Özeti kopyala</button><button class="btn line2" type="button" data-act="closeCo">Alışverişe devam et</button></div>';
+  $("#coPanel").innerHTML='<button class="x" type="button" data-act="closeCo" aria-label="Kapat">'+XSVG+'</button><div class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></div><h2>Siparişiniz alındı</h2>'+
+    '<p style="color:var(--muted)">Sipariş numaranız <b class="tnum" style="color:var(--ink)">'+esc(no)+'</b>. Hazırlanmaya başladığında sizi bilgilendireceğiz.</p>'+eft+'<pre id="orderTxt">'+esc(txt)+'</pre>'+
+    '<div class="acts">'+(res.whatsapp?'<a class="btn" target="_blank" rel="noopener" href="https://wa.me/'+String(res.whatsapp).replace(/\D/g,"")+'?text='+encodeURIComponent(txt)+'">WhatsApp ile mağazaya yaz</a>':'')+'<button class="btn" type="button" data-act="copyOrder">Özeti kopyala</button><button class="btn line2" type="button" data-act="closeCo">Alışverişe devam et</button></div>';
   cart={};coupon=null;saveCart();renderCart();
+  loadStore().catch(function(){});
 }
 
 /* ---------- olaylar ---------- */
 document.addEventListener("click",function(e){
   var el=e.target.closest("[data-act]");if(!el)return;
   var act=el.dataset.act,id=el.dataset.id;
-  if(act==="add"){addItem(id,1);toast(BY[id].name+" sepete eklendi");}
+  if(act==="add"){if(addItem(id,1))toast(BY[id].name+" sepete eklendi");}
   else if(act==="open")openDetail(id);
   else if(act==="fav"){var i=favs.indexOf(id);if(i<0){favs.push(id);toast("Favorilere eklendi");}else favs.splice(i,1);lsSet("kg-favs",favs);renderCount();el.setAttribute("aria-pressed",String(favs.indexOf(id)>-1));if(state.fav)renderGrid();}
   else if(act==="cat"){state.cat=el.dataset.cat;renderChips();renderGrid();}
   else if(act==="reset"){state={cat:"all",q:"",sort:"pop",price:"all",sale:false,fav:false};$("#q").value="";$("#sortSel").value="pop";$("#priceSel").value="all";$("#saleOnly").checked=false;$("#favBtn").setAttribute("aria-pressed","false");renderChips();renderGrid();}
-  else if(act==="inc"){cart[id]=Math.min(20,(cart[id]||0)+1);saveCart();renderCart();}
+  else if(act==="inc"){var mx=maxQty(BY[id]);if((cart[id]||0)>=mx){toast("Stokta yalnızca "+mx+" adet var");return;}cart[id]=(cart[id]||0)+1;saveCart();renderCart();}
   else if(act==="dec"){cart[id]=(cart[id]||1)-1;if(cart[id]<=0)delete cart[id];saveCart();renderCart();}
   else if(act==="rm"){delete cart[id];saveCart();renderCart();}
-  else if(act==="coupon"){var v=($("#cpn").value||"").trim().toUpperCase();if(v==="KAHVALTI10"){coupon=0.10;renderCart();toast("Kupon uygulandı");}else{coupon=null;renderCart();var m=$("#cpnMsg");m.className="msg bad";m.textContent=v?"Bu kupon kodu geçerli değil.":"Kupon kodunu yazın.";}}
+  else if(act==="coupon"){var v=($("#cpn").value||"").trim().toUpperCase();
+    if(!v){coupon=null;renderCart();var m0=$("#cpnMsg");m0.className="msg bad";m0.textContent="Kupon kodunu yazın.";return;}
+    el.disabled=true;
+    api("/api/coupon",{code:v,sub:calc().sub}).then(function(d){coupon={code:d.code,pct:d.pct,min:d.min};renderCart();toast("Kupon uygulandı");},
+      function(err){coupon=null;renderCart();var m=$("#cpnMsg");m.className="msg bad";m.textContent=err.message;$("#cpn").value=v;});}
   else if(act==="shop"){closeCart();location.hash="urunler";}
   else if(act==="checkout")openCheckout();
   else if(act==="closeDetail"){closeModal("#detailModal");}
   else if(act==="closeCo"){closeModal("#coModal");}
-  else if(act==="dq"){detailQty=Math.max(1,Math.min(20,detailQty+(+el.dataset.d)));$("#dq").textContent=detailQty;}
-  else if(act==="addDetail"){var did=$("#detailPanel").dataset.id;addItem(did,detailQty);closeModal("#detailModal");toast(BY[did].name+" sepete eklendi");}
+  else if(act==="dq"){detailQty=Math.max(1,Math.min(maxQty(BY[$("#detailPanel").dataset.id])||1,detailQty+(+el.dataset.d)));$("#dq").textContent=detailQty;}
+  else if(act==="addDetail"){var did=$("#detailPanel").dataset.id;if(addItem(did,detailQty)){closeModal("#detailModal");toast(BY[did].name+" sepete eklendi");}}
   else if(act==="copyOrder"){var t=$("#orderTxt");var done=function(){toast("Sipariş özeti kopyalandı");};
     try{navigator.clipboard.writeText(t.textContent).then(done,function(){var r=document.createRange();r.selectNodeContents(t);var s=getSelection();s.removeAllRanges();s.addRange(r);toast("Metni seçtik, kopyalayabilirsiniz");});}
     catch(err){var r2=document.createRange();r2.selectNodeContents(t);var s2=getSelection();s2.removeAllRanges();s2.addRange(r2);toast("Metni seçtik, kopyalayabilirsiniz");}}
@@ -805,7 +818,6 @@ $("#coPanel").addEventListener("input",function(e){if(e.target.id&&e.target.id.i
 
 /* ---------- başlangıç ---------- */
 /* kayan şerit */
-(function(){var t=CATS.concat(["Yöresel lezzetler"]).map(function(c){return "<span>"+esc(c)+"</span>";}).join("");$("#marquee").innerHTML='<div class="mq-track">'+t+t+'</div>';})();
 /* imleci izleyen ışık */
 $("#grid").addEventListener("pointermove",function(e){var c=e.target.closest(".card");if(!c)return;var r=c.getBoundingClientRect();c.style.setProperty("--mx",(e.clientX-r.left)+"px");c.style.setProperty("--my",(e.clientY-r.top)+"px");});
 /* yukarı çık */
@@ -832,8 +844,25 @@ addEventListener("scroll",f,{passive:true});f();b.addEventListener("click",funct
   addEventListener("resize",function(){size();if(still)draw(4000);});
   document.addEventListener("visibilitychange",function(){if(document.hidden){cancelAnimationFrame(raf);raf=0;}else start();});
 })();
-(function(){var c=[];if(CONFIG.phone)c.push("Telefon: "+CONFIG.phone);if(CONFIG.email)c.push("E-posta: "+CONFIG.email);if(CONFIG.address)c.push(CONFIG.address);if(CONFIG.hours)c.push("Çalışma saatleri: "+CONFIG.hours);$("#footContact").innerHTML=c.map(function(l){return "<span>"+esc(l)+"</span>";}).join("");})();
-renderChips();renderGrid();renderSets();renderCart();
+function renderInfo(){
+  var c=[];if(CONFIG.phone)c.push("Telefon: "+CONFIG.phone);if(CONFIG.email)c.push("E-posta: "+CONFIG.email);if(CONFIG.address)c.push(CONFIG.address);if(CONFIG.hours)c.push("Çalışma saatleri: "+CONFIG.hours);$("#footContact").innerHTML=c.map(function(l){return "<span>"+esc(l)+"</span>";}).join("");
+  var f=TL(FREE_AT);$("#trustFree").textContent=f+" üzeri ücretsiz kargo";
+  $("#faqShip").textContent=f+" ve üzeri siparişlerde kargo ücretsizdir. Altındaki siparişlerde standart teslimat "+TL(SHIP)+", hızlı teslimat "+TL(FAST)+"'dir.";
+  $("#faqPay").textContent="Kapıda ödeme ("+TL(COD)+" hizmet bedeli) ve havale / EFT ile ödeyebilirsiniz.";
+  (function(){var t=CATS.concat(["Yöresel lezzetler"]).map(function(c){return "<span>"+esc(c)+"</span>";}).join("");$("#marquee").innerHTML='<div class="mq-track">'+t+t+'</div>';})();
+}
+async function loadStore(){
+  var d=await api("/api/store");
+  setConfig(d.settings);setProducts(d.products);
+  var fixed=cleanCart();
+  renderInfo();renderChips();renderGrid();renderSets();renderCart();
+  if(fixed)toast("Sepetiniz güncel stoklara göre düzenlendi");
+}
+$("#grid").innerHTML='<div class="empty"><b>Ürünler yükleniyor…</b></div>';
+renderCart();
+(function boot(){loadStore().catch(function(e){$("#grid").innerHTML='<div class="empty"><b>Ürünler yüklenemedi</b>'+esc(e.message)+'<div style="margin-top:16px"><button class="btn" type="button" id="retryLoad">Tekrar dene</button></div></div>';var b=$("#retryLoad");if(b)b.onclick=boot;});})();
+/* sekmeye geri dönüldüğünde stokları tazele */
+document.addEventListener("visibilitychange",function(){if(!document.hidden&&P.length)loadStore().catch(function(){});});
 })();
 </script>
 

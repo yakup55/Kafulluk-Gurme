@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { getRecommendations } from "@/lib/recommend.functions";
-import { PRODUCTS } from "@/lib/products";
 
-type Result = { intro: string; picks: { id: string; reason: string }[] };
+type Result = { intro: string; picks: { id: string; reason: string; name: string; cat: string; w: string; price: number }[] };
 
 const TASTES = ["Tatlı seven", "Keskin & yoğun", "Hafif & tuzu az", "Doğal, işlenmemiş"];
 const PURPOSES = ["Pazar kahvaltısı", "Hediye", "Peynir tabağı", "Çocuklar için"];
@@ -43,7 +42,7 @@ export function TasteAdvisor({ onAdd }: { onAdd: (id: string) => void }) {
             <div className="flex items-start justify-between">
               <div>
                 <h2 className="font-display text-2xl font-bold">Gurme danışmanın</h2>
-                <p className="text-sm text-muted-foreground">Ne sevdiğini anlat, sana uygun bal, peynir ve zeytini seçelim.</p>
+                <p className="text-sm text-muted-foreground">Ne sevdiğini anlat, kahvaltı sofrana uygun ürünleri seçelim.</p>
               </div>
               <button onClick={() => setOpen(false)} aria-label="Kapat" className="text-2xl leading-none text-muted-foreground">×</button>
             </div>
@@ -70,7 +69,7 @@ export function TasteAdvisor({ onAdd }: { onAdd: (id: string) => void }) {
               <div className="mt-5 space-y-3">
                 <p className="text-sm italic">{res.intro}</p>
                 {res.picks.map((pk) => {
-                  const p = PRODUCTS.find((x) => x.id === pk.id)!;
+                  const p = pk;
                   const done = added.includes(p.id);
                   return (
                     <div key={p.id} className="rounded-2xl border border-border bg-background p-4">

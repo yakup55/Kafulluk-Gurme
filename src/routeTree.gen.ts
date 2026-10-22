@@ -10,33 +10,193 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiCouponRouteImport } from './routes/api/coupon'
+import { Route as ApiOrdersRouteImport } from './routes/api/orders'
+import { Route as ApiStoreRouteImport } from './routes/api/store'
+import { Route as ApiAdminDataRouteImport } from './routes/api/admin/data'
+import { Route as ApiAdminImportRouteImport } from './routes/api/admin/import'
+import { Route as ApiAdminLoginRouteImport } from './routes/api/admin/login'
+import { Route as ApiAdminLogoutRouteImport } from './routes/api/admin/logout'
+import { Route as ApiAdminSettingsRouteImport } from './routes/api/admin/settings'
+import { Route as ApiAdminCouponsCodeRouteImport } from './routes/api/admin/coupons.$code'
+import { Route as ApiAdminOrdersIdRouteImport } from './routes/api/admin/orders.$id'
+import { Route as ApiAdminProductsIdRouteImport } from './routes/api/admin/products.$id'
+import { Route as ApiAdminStockIdRouteImport } from './routes/api/admin/stock.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCouponRoute = ApiCouponRouteImport.update({
+  id: '/api/coupon',
+  path: '/api/coupon',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiOrdersRoute = ApiOrdersRouteImport.update({
+  id: '/api/orders',
+  path: '/api/orders',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiStoreRoute = ApiStoreRouteImport.update({
+  id: '/api/store',
+  path: '/api/store',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminDataRoute = ApiAdminDataRouteImport.update({
+  id: '/api/admin/data',
+  path: '/api/admin/data',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminImportRoute = ApiAdminImportRouteImport.update({
+  id: '/api/admin/import',
+  path: '/api/admin/import',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminLoginRoute = ApiAdminLoginRouteImport.update({
+  id: '/api/admin/login',
+  path: '/api/admin/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminLogoutRoute = ApiAdminLogoutRouteImport.update({
+  id: '/api/admin/logout',
+  path: '/api/admin/logout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminSettingsRoute = ApiAdminSettingsRouteImport.update({
+  id: '/api/admin/settings',
+  path: '/api/admin/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminCouponsCodeRoute = ApiAdminCouponsCodeRouteImport.update({
+  id: '/api/admin/coupons/$code',
+  path: '/api/admin/coupons/$code',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminOrdersIdRoute = ApiAdminOrdersIdRouteImport.update({
+  id: '/api/admin/orders/$id',
+  path: '/api/admin/orders/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminProductsIdRoute = ApiAdminProductsIdRouteImport.update({
+  id: '/api/admin/products/$id',
+  path: '/api/admin/products/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminStockIdRoute = ApiAdminStockIdRouteImport.update({
+  id: '/api/admin/stock/$id',
+  path: '/api/admin/stock/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/api/coupon': typeof ApiCouponRoute
+  '/api/orders': typeof ApiOrdersRoute
+  '/api/store': typeof ApiStoreRoute
+  '/api/admin/data': typeof ApiAdminDataRoute
+  '/api/admin/import': typeof ApiAdminImportRoute
+  '/api/admin/login': typeof ApiAdminLoginRoute
+  '/api/admin/logout': typeof ApiAdminLogoutRoute
+  '/api/admin/settings': typeof ApiAdminSettingsRoute
+  '/api/admin/coupons/$code': typeof ApiAdminCouponsCodeRoute
+  '/api/admin/orders/$id': typeof ApiAdminOrdersIdRoute
+  '/api/admin/products/$id': typeof ApiAdminProductsIdRoute
+  '/api/admin/stock/$id': typeof ApiAdminStockIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/coupon': typeof ApiCouponRoute
+  '/api/orders': typeof ApiOrdersRoute
+  '/api/store': typeof ApiStoreRoute
+  '/api/admin/data': typeof ApiAdminDataRoute
+  '/api/admin/import': typeof ApiAdminImportRoute
+  '/api/admin/login': typeof ApiAdminLoginRoute
+  '/api/admin/logout': typeof ApiAdminLogoutRoute
+  '/api/admin/settings': typeof ApiAdminSettingsRoute
+  '/api/admin/coupons/$code': typeof ApiAdminCouponsCodeRoute
+  '/api/admin/orders/$id': typeof ApiAdminOrdersIdRoute
+  '/api/admin/products/$id': typeof ApiAdminProductsIdRoute
+  '/api/admin/stock/$id': typeof ApiAdminStockIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/api/coupon': typeof ApiCouponRoute
+  '/api/orders': typeof ApiOrdersRoute
+  '/api/store': typeof ApiStoreRoute
+  '/api/admin/data': typeof ApiAdminDataRoute
+  '/api/admin/import': typeof ApiAdminImportRoute
+  '/api/admin/login': typeof ApiAdminLoginRoute
+  '/api/admin/logout': typeof ApiAdminLogoutRoute
+  '/api/admin/settings': typeof ApiAdminSettingsRoute
+  '/api/admin/coupons/$code': typeof ApiAdminCouponsCodeRoute
+  '/api/admin/orders/$id': typeof ApiAdminOrdersIdRoute
+  '/api/admin/products/$id': typeof ApiAdminProductsIdRoute
+  '/api/admin/stock/$id': typeof ApiAdminStockIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/api/coupon'
+    | '/api/orders'
+    | '/api/store'
+    | '/api/admin/data'
+    | '/api/admin/import'
+    | '/api/admin/login'
+    | '/api/admin/logout'
+    | '/api/admin/settings'
+    | '/api/admin/coupons/$code'
+    | '/api/admin/orders/$id'
+    | '/api/admin/products/$id'
+    | '/api/admin/stock/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/api/coupon'
+    | '/api/orders'
+    | '/api/store'
+    | '/api/admin/data'
+    | '/api/admin/import'
+    | '/api/admin/login'
+    | '/api/admin/logout'
+    | '/api/admin/settings'
+    | '/api/admin/coupons/$code'
+    | '/api/admin/orders/$id'
+    | '/api/admin/products/$id'
+    | '/api/admin/stock/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/api/coupon'
+    | '/api/orders'
+    | '/api/store'
+    | '/api/admin/data'
+    | '/api/admin/import'
+    | '/api/admin/login'
+    | '/api/admin/logout'
+    | '/api/admin/settings'
+    | '/api/admin/coupons/$code'
+    | '/api/admin/orders/$id'
+    | '/api/admin/products/$id'
+    | '/api/admin/stock/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ApiCouponRoute: typeof ApiCouponRoute
+  ApiOrdersRoute: typeof ApiOrdersRoute
+  ApiStoreRoute: typeof ApiStoreRoute
+  ApiAdminDataRoute: typeof ApiAdminDataRoute
+  ApiAdminImportRoute: typeof ApiAdminImportRoute
+  ApiAdminLoginRoute: typeof ApiAdminLoginRoute
+  ApiAdminLogoutRoute: typeof ApiAdminLogoutRoute
+  ApiAdminSettingsRoute: typeof ApiAdminSettingsRoute
+  ApiAdminCouponsCodeRoute: typeof ApiAdminCouponsCodeRoute
+  ApiAdminOrdersIdRoute: typeof ApiAdminOrdersIdRoute
+  ApiAdminProductsIdRoute: typeof ApiAdminProductsIdRoute
+  ApiAdminStockIdRoute: typeof ApiAdminStockIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +208,107 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/coupon': {
+      id: '/api/coupon'
+      path: '/api/coupon'
+      fullPath: '/api/coupon'
+      preLoaderRoute: typeof ApiCouponRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/orders': {
+      id: '/api/orders'
+      path: '/api/orders'
+      fullPath: '/api/orders'
+      preLoaderRoute: typeof ApiOrdersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/store': {
+      id: '/api/store'
+      path: '/api/store'
+      fullPath: '/api/store'
+      preLoaderRoute: typeof ApiStoreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/data': {
+      id: '/api/admin/data'
+      path: '/api/admin/data'
+      fullPath: '/api/admin/data'
+      preLoaderRoute: typeof ApiAdminDataRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/import': {
+      id: '/api/admin/import'
+      path: '/api/admin/import'
+      fullPath: '/api/admin/import'
+      preLoaderRoute: typeof ApiAdminImportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/login': {
+      id: '/api/admin/login'
+      path: '/api/admin/login'
+      fullPath: '/api/admin/login'
+      preLoaderRoute: typeof ApiAdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/logout': {
+      id: '/api/admin/logout'
+      path: '/api/admin/logout'
+      fullPath: '/api/admin/logout'
+      preLoaderRoute: typeof ApiAdminLogoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/settings': {
+      id: '/api/admin/settings'
+      path: '/api/admin/settings'
+      fullPath: '/api/admin/settings'
+      preLoaderRoute: typeof ApiAdminSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/coupons/$code': {
+      id: '/api/admin/coupons/$code'
+      path: '/api/admin/coupons/$code'
+      fullPath: '/api/admin/coupons/$code'
+      preLoaderRoute: typeof ApiAdminCouponsCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/orders/$id': {
+      id: '/api/admin/orders/$id'
+      path: '/api/admin/orders/$id'
+      fullPath: '/api/admin/orders/$id'
+      preLoaderRoute: typeof ApiAdminOrdersIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/products/$id': {
+      id: '/api/admin/products/$id'
+      path: '/api/admin/products/$id'
+      fullPath: '/api/admin/products/$id'
+      preLoaderRoute: typeof ApiAdminProductsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/stock/$id': {
+      id: '/api/admin/stock/$id'
+      path: '/api/admin/stock/$id'
+      fullPath: '/api/admin/stock/$id'
+      preLoaderRoute: typeof ApiAdminStockIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ApiCouponRoute: ApiCouponRoute,
+  ApiOrdersRoute: ApiOrdersRoute,
+  ApiStoreRoute: ApiStoreRoute,
+  ApiAdminDataRoute: ApiAdminDataRoute,
+  ApiAdminImportRoute: ApiAdminImportRoute,
+  ApiAdminLoginRoute: ApiAdminLoginRoute,
+  ApiAdminLogoutRoute: ApiAdminLogoutRoute,
+  ApiAdminSettingsRoute: ApiAdminSettingsRoute,
+  ApiAdminCouponsCodeRoute: ApiAdminCouponsCodeRoute,
+  ApiAdminOrdersIdRoute: ApiAdminOrdersIdRoute,
+  ApiAdminProductsIdRoute: ApiAdminProductsIdRoute,
+  ApiAdminStockIdRoute: ApiAdminStockIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

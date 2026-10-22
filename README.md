@@ -1,6 +1,46 @@
-# Kafullukgurme
+# Kafulluk Gurme
 
-bu projeye güzel bir şey eklemek istiyorum seninle
+Gurme kahvaltılık ürünler satan e-ticaret sitesi: vitrin (`/`), satıcı paneli (`/satici.html`) ve PostgreSQL üzerinde çalışan bir API.
+
+## Mimari
+
+| Katman | Nerede | Ne yapar |
+| --- | --- | --- |
+| Vitrin | `public/kafulluk.html` (ana sayfada iframe) | Ürünleri ve ayarları `/api/store`'dan okur, kuponu `/api/coupon` ile doğrular, siparişi `/api/orders`'a gönderir |
+| Satıcı paneli | `public/satici.html` | Şifreyle giriş; ürün, stok, sipariş, kupon ve ayar yönetimi (`/api/admin/*`). Yeni siparişleri 20 sn'de bir kontrol eder |
+| API | `src/routes/api/**` (TanStack Start server routes) | İş kuralları `src/lib/server/store.ts` içinde |
+| Veritabanı | PostgreSQL (`src/lib/server/db.ts`) | Şema ilk istekte otomatik kurulur; ürün tablosu boşsa örnek katalog yüklenir |
+
+### Stok kuralları
+- Sipariş verildiğinde stok **aynı veritabanı işleminde** düşülür (`UPDATE … WHERE stock >= adet`). Aynı anda gelen siparişlerde stok eksiye düşmez; yetmeyen siparişe "X için yalnızca N adet kaldı" yanıtı döner.
+- Fiyat, kupon, kargo ve kapıda ödeme bedeli **sunucuda** hesaplanır. Tarayıcıdaki toplam farklıysa sipariş reddedilir ve müşteriye güncel özet gösterilir.
+- Sipariş iptal edilince stok geri eklenir; iptal geri alınırsa tekrar düşülür. Sipariş silinirse stok iade edilir.
+- Her stok hareketi `stock_moves` tablosuna yazılır (kim, ne zaman, hangi sipariş).
+- Setlerin stoğu ayrı tutulur (set satışı içindeki ürünlerin stoğunu düşmez).
+
+## Kurulum
+
+1. `.env.example` dosyasını `.env` olarak kopyalayın ve `DATABASE_URL`, `ADMIN_PASSWORD`, `SESSION_SECRET` değerlerini girin.
+2. `bun install` (ya da `npm i`)
+3. `bun run dev` → vitrin: http://localhost:3000 · panel: http://localhost:3000/satici.html
+
+Lovable üzerinde yayınlıyorsanız aynı değişkenleri projenin **Secrets** bölümüne ekleyin.
+
+## API özeti
+
+| Yöntem | Yol | Açıklama |
+| --- | --- | --- |
+| GET | `/api/store` | Satıştaki ürünler (stokla) + mağaza ayarları |
+| POST | `/api/coupon` | `{ code, sub }` kupon doğrulama |
+| POST | `/api/orders` | Müşteri siparişi |
+| POST | `/api/admin/login` · `/api/admin/logout` | Panel oturumu (HttpOnly çerez) |
+| GET | `/api/admin/data` | Ürünler, siparişler, kuponlar, ayarlar |
+| PUT/PATCH/DELETE | `/api/admin/products/:id` | Ürün kaydet / satışa aç-kapat / sil |
+| POST | `/api/admin/stock/:id` | `{ delta }` stok ekle/çıkar |
+| PUT/PATCH/DELETE | `/api/admin/orders/:id` | Elle sipariş / durum-kargo-not / sil |
+| PUT/PATCH/DELETE | `/api/admin/coupons/:code` | Kupon yönetimi |
+| PUT | `/api/admin/settings` | Mağaza ayarları (kargo ücretleri, IBAN, WhatsApp…) |
+| POST | `/api/admin/import` | Eski tarayıcı yedeğini (JSON) veritabanına aktar |
 
 This project was built with [Lovable](https://lovable.dev).
 
