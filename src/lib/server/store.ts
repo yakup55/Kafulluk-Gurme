@@ -381,17 +381,21 @@ export async function placeWebOrder(input: z.infer<typeof webOrderSchema>) {
 
 export async function adminData() {
   const sql = await db();
-  const [products, orders, coupons, settings] = await Promise.all([
+  const [products, orders, coupons, settings, questions] = await Promise.all([
     sql<ProductRow[]>`SELECT * FROM products ORDER BY sort, name`,
     sql.unsafe<OrderRow[]>(ORDER_SELECT("ORDER BY o.created_at DESC LIMIT 2000")),
     sql`SELECT code, pct, min, active FROM coupons ORDER BY code`,
     sql<{ value: Partial<Settings> }[]>`SELECT value FROM settings WHERE key = 'store'`,
+    sql<
+      QuestionRow[]
+    >`SELECT * FROM questions ORDER BY (answer = '') DESC, created_at DESC LIMIT 1000`,
   ]);
   return {
     products: products.map(productOut),
     orders: orders.map(orderOut),
     coupons,
     settings: settings[0]?.value ?? {},
+    questions: questions.map(questionOut),
   };
 }
 
@@ -839,4 +843,153 @@ export async function changeOwnPassword(id: number, current: string, next: strin
     UPDATE admin_users SET pass_hash = ${await hashPassword(next)}, session_ver = session_ver + 1
     WHERE id = ${id} RETURNING id, session_ver`;
   return r[0]!;
+}
+
+/* ================= SORU & CEVAP ================= */
+
+type QuestionRow = {
+  id: number;
+  created_at: Date;
+  pid: string | null;
+  product_name: string;
+  name: string;
+  contact: string;
+  question: string;
+  answer: string;
+  answered_at: Date | null;
+  answered_by: string | null;
+  public: boolean;
+};
+
+function questionOut(r: QuestionRow) {
+  return {
+    id: r.id,
+    createdAt: r.created_at.getTime(),
+    pid: r.pid,
+    productName: r.product_name,
+    name: r.name,
+    contact: r.contact,
+    question: r.question,
+    answer: r.answer,
+    answeredAt: r.answered_at ? r.answered_at.getTime() : null,
+    answeredBy: r.answered_by,
+    public: r.public,
+  };
+}
+
+const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+export const questionSchema = z.object({
+  name: z.string().trim().min(2).max(80),
+  contact: z
+    .string()
+    .trim()
+    .max(160)
+    .refine((v) => emailRe.test(v) || phoneOk(v), "geçerli bir e-posta ya da telefon gerekli"),
+  pid: z.string().max(80).nullable().optional(),
+  question: z.string().trim().min(10, "en az 10 karakter").max(1000),
+  /** bot tuzağı: gerçek kullanıcı bu alanı görmez, boş bırakır */
+  website: z.string().max(200).optional(),
+});
+
+/*
+ * Spam koruması (sunucu örneği başına, bellekte):
+ *  - aynı e-posta/telefondan 10 dakikada en fazla 4 soru
+ *  - aynı IP'den 10 dakikada en fazla 20 soru (Nginx X-Forwarded-For göndermezse tüm
+ *    ziyaretçiler tek IP gibi görünür; bu yüzden IP sınırı geniş tutuldu)
+ */
+const askLog = new Map<string, number[]>();
+function hit(key: string, limit: number) {
+  const now = Date.now();
+  const recent = (askLog.get(key) ?? []).filter((t) => now - t < 10 * 60_000);
+  if (recent.length >= limit) return false;
+  recent.push(now);
+  askLog.set(key, recent);
+  return true;
+}
+function askAllowed(ip: string, contact: string) {
+  const c = contact.toLowerCase().replace(/[^a-z0-9@.]/g, "");
+  return hit("c:" + c, 4) && hit("ip:" + ip, 20);
+}
+
+export async function askQuestion(q: z.infer<typeof questionSchema>, ip: string) {
+  // Bot tuzağı doluysa sessizce "alındı" de, kaydetme
+  if (q.website) return { ok: true };
+  if (!askAllowed(ip, q.contact))
+    throw new HttpError(429, "Kısa sürede çok fazla soru gönderdiniz. Biraz sonra tekrar deneyin.");
+  const sql = await db();
+  let productName = "";
+  let pid: string | null = null;
+  if (q.pid) {
+    const p = (
+      await sql<{ id: string; name: string }[]>`SELECT id, name FROM products WHERE id = ${q.pid}`
+    )[0];
+    if (p) {
+      pid = p.id;
+      productName = p.name;
+    }
+  }
+  await sql`INSERT INTO questions (pid, product_name, name, contact, question, ip)
+            VALUES (${pid}, ${productName}, ${q.name}, ${q.contact}, ${q.question}, ${ip})`;
+  return { ok: true };
+}
+
+/** Ürün sayfasında gösterilecek, yayınlanmış yanıtlar (müşteri iletişim bilgisi döndürülmez) */
+export async function publicAnswers(pid: string) {
+  const sql = await db();
+  const rows = await sql<
+    { name: string; question: string; answer: string; created_at: Date; answered_at: Date }[]
+  >`
+    SELECT name, question, answer, created_at, answered_at FROM questions
+    WHERE pid = ${pid} AND public AND answer <> '' ORDER BY answered_at DESC LIMIT 30`;
+  return rows.map((r) => ({
+    // gizlilik: "Ayşe Yılmaz" → "Ayşe Y."
+    name: r.name
+      .split(/\s+/)
+      .map((w, i) => (i === 0 ? w : w.charAt(0) + "."))
+      .join(" "),
+    question: r.question,
+    answer: r.answer,
+    createdAt: r.created_at.getTime(),
+    answeredAt: r.answered_at.getTime(),
+  }));
+}
+
+export const questionPatchSchema = z.object({
+  answer: z.string().trim().max(2000).optional(),
+  public: z.boolean().optional(),
+});
+
+export async function patchQuestion(
+  id: number,
+  p: z.infer<typeof questionPatchSchema>,
+  actor: string,
+) {
+  const sql = await db();
+  return transaction(sql, async (tx) => {
+    const q = (
+      await tx<{ answer: string; pid: string | null }[]>`
+      SELECT answer, pid FROM questions WHERE id = ${id} FOR UPDATE`
+    )[0];
+    if (!q) throw new HttpError(404, "Soru bulunamadı.");
+    const answer = p.answer ?? q.answer;
+    if (p.answer !== undefined) {
+      await tx`UPDATE questions SET answer = ${p.answer},
+                 answered_at = ${p.answer ? new Date() : null}, answered_by = ${p.answer ? actor : null}
+               WHERE id = ${id}`;
+    }
+    if (p.public !== undefined) {
+      if (p.public && !answer) throw new HttpError(422, "Yayınlamak için önce yanıt yazın.");
+      if (p.public && !q.pid)
+        throw new HttpError(422, "Genel sorular ürün sayfasında yayınlanamaz.");
+      await tx`UPDATE questions SET public = ${p.public} WHERE id = ${id}`;
+    }
+    if (!answer) await tx`UPDATE questions SET public = false WHERE id = ${id}`;
+    return { ok: true };
+  });
+}
+
+export async function deleteQuestion(id: number) {
+  const sql = await db();
+  await sql`DELETE FROM questions WHERE id = ${id}`;
+  return { ok: true };
 }

@@ -5,10 +5,12 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Kafulluk Gurme" },
-      { name: "description", content: "Kafulluk Gurme — doğal, lezzetli gurme ürünler." },
+      { name: "description", content: "Kafulluk Gurme — Taze, Doğal, Güvenli. Yöresel kahvaltılık ve gurme ürünler." },
       { property: "og:title", content: "Kafulluk Gurme" },
-      { property: "og:description", content: "Kafulluk Gurme — doğal, lezzetli gurme ürünler." },
+      { property: "og:description", content: "Kafulluk Gurme — Taze, Doğal, Güvenli. Yöresel kahvaltılık ve gurme ürünler." },
       { property: "og:type", content: "website" },
+      { property: "og:image", content: "/og-image.png" },
+      { name: "theme-color", content: "#40712E" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),

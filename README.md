@@ -42,6 +42,13 @@ Gurme kahvaltılık ürünler satan e-ticaret sitesi: vitrin (`/`), satıcı pan
 
 Lovable üzerinde yayınlıyorsanız aynı değişkenleri projenin **Secrets** bölümüne ekleyin.
 
+## Satıcıya soru (Soru & Cevap)
+
+- Vitrinde menüdeki **Soru sor**, SSS altındaki kutu ve her ürün sayfasındaki **Satıcıya soru sor** ile müşteri ad, e-posta/telefon ve sorusunu gönderir.
+- Panelde **Sorular** ekranı: bekleyen soru sayısı menüde ve sekme başlığında görünür, yeni soru gelince bildirim çıkar. Yanıt yazılır; ürünle ilgili yanıtlar **Ürün sayfasında yayınla** ile vitrinde "Soru & Cevap" altında gösterilir (müşteri adı "Ayşe Y." şeklinde kısaltılır, iletişim bilgisi asla gösterilmez). **E-posta / WhatsApp ile gönder** hazır mesajla müşteriye yanıt açar.
+- Personel yanıtlayabilir ve yayınlayabilir; soru silme yönetici yetkisindedir.
+- Spam koruması: bot tuzağı alanı, aynı e-posta/telefondan 10 dk'da 4, aynı IP'den 20 soru. Nginx arkasında gerçek IP için `proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;` ekleyin.
+
 ## Demo veri
 
 Paneli ve vitrini müşteriye göstermek ya da denemek için:
@@ -62,6 +69,8 @@ Siparişler **örnek** işaretlidir; canlıya geçmeden önce Panel → Özet �
 | GET | `/api/store` | Satıştaki ürünler (stokla) + mağaza ayarları |
 | POST | `/api/coupon` | `{ code, sub }` kupon doğrulama |
 | POST | `/api/orders` | Müşteri siparişi |
+| GET/POST | `/api/questions` | Ürünün yayınlanmış soru-cevapları (`?pid=`) / satıcıya soru gönder |
+| PATCH/DELETE | `/api/admin/questions/:id` | Yanıtla, yayınla / sil (yönetici) |
 | POST | `/api/admin/login` · `/api/admin/logout` | Panel oturumu (`{ username, password }`, HttpOnly çerez) |
 | GET | `/api/admin/me` | Giriş yapmış kullanıcı ve rolü |
 | POST | `/api/admin/password` | Kendi şifresini değiştir |

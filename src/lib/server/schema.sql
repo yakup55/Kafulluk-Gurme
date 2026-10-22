@@ -98,3 +98,21 @@ ALTER TABLE stock_moves ADD COLUMN IF NOT EXISTS actor text;
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS status_by text;
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS created_by text;
 CREATE INDEX IF NOT EXISTS stock_moves_pid_idx ON stock_moves (pid, created_at DESC);
+
+-- müşterinin satıcıya sorduğu sorular
+CREATE TABLE IF NOT EXISTS questions (
+  id           serial PRIMARY KEY,
+  created_at   timestamptz NOT NULL DEFAULT now(),
+  pid          text,                       -- ürünle ilgiliyse ürün kodu (ürün silinse de soru kalır)
+  product_name text NOT NULL DEFAULT '',
+  name         text NOT NULL,
+  contact      text NOT NULL,              -- e-posta ya da telefon
+  question     text NOT NULL,
+  answer       text NOT NULL DEFAULT '',
+  answered_at  timestamptz,
+  answered_by  text,
+  public       boolean NOT NULL DEFAULT false,  -- yanıt ürün sayfasında görünsün mü
+  ip           text
+);
+CREATE INDEX IF NOT EXISTS questions_created_idx ON questions (created_at DESC);
+CREATE INDEX IF NOT EXISTS questions_pid_idx ON questions (pid) WHERE public;

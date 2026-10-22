@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiCouponRouteImport } from './routes/api/coupon'
 import { Route as ApiOrdersRouteImport } from './routes/api/orders'
+import { Route as ApiQuestionsRouteImport } from './routes/api/questions'
 import { Route as ApiStoreRouteImport } from './routes/api/store'
 import { Route as ApiAdminDataRouteImport } from './routes/api/admin/data'
 import { Route as ApiAdminImportRouteImport } from './routes/api/admin/import'
@@ -24,6 +25,7 @@ import { Route as ApiAdminUsersRouteImport } from './routes/api/admin/users'
 import { Route as ApiAdminCouponsCodeRouteImport } from './routes/api/admin/coupons.$code'
 import { Route as ApiAdminOrdersIdRouteImport } from './routes/api/admin/orders.$id'
 import { Route as ApiAdminProductsIdRouteImport } from './routes/api/admin/products.$id'
+import { Route as ApiAdminQuestionsIdRouteImport } from './routes/api/admin/questions.$id'
 import { Route as ApiAdminStockIdRouteImport } from './routes/api/admin/stock.$id'
 import { Route as ApiAdminUsersIdRouteImport } from './routes/api/admin/users.$id'
 
@@ -40,6 +42,11 @@ const ApiCouponRoute = ApiCouponRouteImport.update({
 const ApiOrdersRoute = ApiOrdersRouteImport.update({
   id: '/api/orders',
   path: '/api/orders',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiQuestionsRoute = ApiQuestionsRouteImport.update({
+  id: '/api/questions',
+  path: '/api/questions',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiStoreRoute = ApiStoreRouteImport.update({
@@ -102,6 +109,11 @@ const ApiAdminProductsIdRoute = ApiAdminProductsIdRouteImport.update({
   path: '/api/admin/products/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminQuestionsIdRoute = ApiAdminQuestionsIdRouteImport.update({
+  id: '/api/admin/questions/$id',
+  path: '/api/admin/questions/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAdminStockIdRoute = ApiAdminStockIdRouteImport.update({
   id: '/api/admin/stock/$id',
   path: '/api/admin/stock/$id',
@@ -117,6 +129,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/api/coupon': typeof ApiCouponRoute
   '/api/orders': typeof ApiOrdersRoute
+  '/api/questions': typeof ApiQuestionsRoute
   '/api/store': typeof ApiStoreRoute
   '/api/admin/data': typeof ApiAdminDataRoute
   '/api/admin/import': typeof ApiAdminImportRoute
@@ -129,6 +142,7 @@ export interface FileRoutesByFullPath {
   '/api/admin/coupons/$code': typeof ApiAdminCouponsCodeRoute
   '/api/admin/orders/$id': typeof ApiAdminOrdersIdRoute
   '/api/admin/products/$id': typeof ApiAdminProductsIdRoute
+  '/api/admin/questions/$id': typeof ApiAdminQuestionsIdRoute
   '/api/admin/stock/$id': typeof ApiAdminStockIdRoute
   '/api/admin/users/$id': typeof ApiAdminUsersIdRoute
 }
@@ -136,6 +150,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/api/coupon': typeof ApiCouponRoute
   '/api/orders': typeof ApiOrdersRoute
+  '/api/questions': typeof ApiQuestionsRoute
   '/api/store': typeof ApiStoreRoute
   '/api/admin/data': typeof ApiAdminDataRoute
   '/api/admin/import': typeof ApiAdminImportRoute
@@ -148,6 +163,7 @@ export interface FileRoutesByTo {
   '/api/admin/coupons/$code': typeof ApiAdminCouponsCodeRoute
   '/api/admin/orders/$id': typeof ApiAdminOrdersIdRoute
   '/api/admin/products/$id': typeof ApiAdminProductsIdRoute
+  '/api/admin/questions/$id': typeof ApiAdminQuestionsIdRoute
   '/api/admin/stock/$id': typeof ApiAdminStockIdRoute
   '/api/admin/users/$id': typeof ApiAdminUsersIdRoute
 }
@@ -156,6 +172,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/api/coupon': typeof ApiCouponRoute
   '/api/orders': typeof ApiOrdersRoute
+  '/api/questions': typeof ApiQuestionsRoute
   '/api/store': typeof ApiStoreRoute
   '/api/admin/data': typeof ApiAdminDataRoute
   '/api/admin/import': typeof ApiAdminImportRoute
@@ -168,6 +185,7 @@ export interface FileRoutesById {
   '/api/admin/coupons/$code': typeof ApiAdminCouponsCodeRoute
   '/api/admin/orders/$id': typeof ApiAdminOrdersIdRoute
   '/api/admin/products/$id': typeof ApiAdminProductsIdRoute
+  '/api/admin/questions/$id': typeof ApiAdminQuestionsIdRoute
   '/api/admin/stock/$id': typeof ApiAdminStockIdRoute
   '/api/admin/users/$id': typeof ApiAdminUsersIdRoute
 }
@@ -177,6 +195,7 @@ export interface FileRouteTypes {
     | '/'
     | '/api/coupon'
     | '/api/orders'
+    | '/api/questions'
     | '/api/store'
     | '/api/admin/data'
     | '/api/admin/import'
@@ -189,6 +208,7 @@ export interface FileRouteTypes {
     | '/api/admin/coupons/$code'
     | '/api/admin/orders/$id'
     | '/api/admin/products/$id'
+    | '/api/admin/questions/$id'
     | '/api/admin/stock/$id'
     | '/api/admin/users/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -196,6 +216,7 @@ export interface FileRouteTypes {
     | '/'
     | '/api/coupon'
     | '/api/orders'
+    | '/api/questions'
     | '/api/store'
     | '/api/admin/data'
     | '/api/admin/import'
@@ -208,6 +229,7 @@ export interface FileRouteTypes {
     | '/api/admin/coupons/$code'
     | '/api/admin/orders/$id'
     | '/api/admin/products/$id'
+    | '/api/admin/questions/$id'
     | '/api/admin/stock/$id'
     | '/api/admin/users/$id'
   id:
@@ -215,6 +237,7 @@ export interface FileRouteTypes {
     | '/'
     | '/api/coupon'
     | '/api/orders'
+    | '/api/questions'
     | '/api/store'
     | '/api/admin/data'
     | '/api/admin/import'
@@ -227,6 +250,7 @@ export interface FileRouteTypes {
     | '/api/admin/coupons/$code'
     | '/api/admin/orders/$id'
     | '/api/admin/products/$id'
+    | '/api/admin/questions/$id'
     | '/api/admin/stock/$id'
     | '/api/admin/users/$id'
   fileRoutesById: FileRoutesById
@@ -235,6 +259,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ApiCouponRoute: typeof ApiCouponRoute
   ApiOrdersRoute: typeof ApiOrdersRoute
+  ApiQuestionsRoute: typeof ApiQuestionsRoute
   ApiStoreRoute: typeof ApiStoreRoute
   ApiAdminDataRoute: typeof ApiAdminDataRoute
   ApiAdminImportRoute: typeof ApiAdminImportRoute
@@ -247,6 +272,7 @@ export interface RootRouteChildren {
   ApiAdminCouponsCodeRoute: typeof ApiAdminCouponsCodeRoute
   ApiAdminOrdersIdRoute: typeof ApiAdminOrdersIdRoute
   ApiAdminProductsIdRoute: typeof ApiAdminProductsIdRoute
+  ApiAdminQuestionsIdRoute: typeof ApiAdminQuestionsIdRoute
   ApiAdminStockIdRoute: typeof ApiAdminStockIdRoute
 }
 
@@ -271,6 +297,13 @@ declare module '@tanstack/react-router' {
       path: '/api/orders'
       fullPath: '/api/orders'
       preLoaderRoute: typeof ApiOrdersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/questions': {
+      id: '/api/questions'
+      path: '/api/questions'
+      fullPath: '/api/questions'
+      preLoaderRoute: typeof ApiQuestionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/store': {
@@ -357,6 +390,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminProductsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/questions/$id': {
+      id: '/api/admin/questions/$id'
+      path: '/api/admin/questions/$id'
+      fullPath: '/api/admin/questions/$id'
+      preLoaderRoute: typeof ApiAdminQuestionsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/admin/stock/$id': {
       id: '/api/admin/stock/$id'
       path: '/api/admin/stock/$id'
@@ -390,6 +430,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ApiCouponRoute: ApiCouponRoute,
   ApiOrdersRoute: ApiOrdersRoute,
+  ApiQuestionsRoute: ApiQuestionsRoute,
   ApiStoreRoute: ApiStoreRoute,
   ApiAdminDataRoute: ApiAdminDataRoute,
   ApiAdminImportRoute: ApiAdminImportRoute,
@@ -402,6 +443,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminCouponsCodeRoute: ApiAdminCouponsCodeRoute,
   ApiAdminOrdersIdRoute: ApiAdminOrdersIdRoute,
   ApiAdminProductsIdRoute: ApiAdminProductsIdRoute,
+  ApiAdminQuestionsIdRoute: ApiAdminQuestionsIdRoute,
   ApiAdminStockIdRoute: ApiAdminStockIdRoute,
 }
 export const routeTree = rootRouteImport

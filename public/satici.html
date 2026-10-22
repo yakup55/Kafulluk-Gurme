@@ -1,6 +1,8 @@
 <!doctype html>
 <html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Kafulluk Satıcı Paneli</title>
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/logo.svg" type="image/svg+xml">
 <meta name="robots" content="noindex,nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -44,7 +46,7 @@ button{cursor:pointer}
 .app{max-width:1380px;margin:0 auto;display:grid;grid-template-columns:240px minmax(0,1fr);gap:28px;padding-block:20px 48px;padding-top:max(20px,env(safe-area-inset-top,0px));padding-bottom:max(48px,env(safe-area-inset-bottom,0px))}
 .side{position:sticky;top:max(20px,env(safe-area-inset-top,0px));align-self:start;display:flex;flex-direction:column;gap:18px;padding:18px 14px;border:1px solid var(--line);border-radius:22px;background:var(--glass);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
 .brand{display:flex;align-items:center;gap:10px;padding:0 6px}
-.brand svg{width:62px;height:39px;flex:none}
+.brand img{height:46px;width:auto;flex:none;padding:4px 6px;border-radius:12px;background:#FBF6EA}
 .brand b{display:block;font-family:var(--f-display);font-size:17px;line-height:1.1}
 .brand small{color:var(--muted);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
 .nav{display:grid;gap:4px}
@@ -60,7 +62,7 @@ button{cursor:pointer}
 @media (max-width:900px){
   .app{grid-template-columns:minmax(0,1fr);gap:14px}
   .side{position:static;flex-direction:row;align-items:center;gap:10px;padding:10px;overflow-x:auto;border-radius:18px}
-  .brand{flex:none}.brand small{display:none}.brand div{display:none}.brand svg{width:62px;height:39px}
+  .brand{flex:none}.brand small{display:none}.brand div{display:none}.brand img{height:42px;width:auto}
   .nav{display:flex;gap:4px}
   .nb{width:auto;white-space:nowrap;padding:9px 12px}
   .side .link{display:none}
@@ -168,6 +170,16 @@ button.trow:hover,.trow.hov:hover{background:rgba(255,255,255,.04)}
 .rl{display:grid;gap:2px}
 .rl .trow{padding:11px 4px;--cols:minmax(0,1fr) auto}
 .skel{height:84px;border-radius:20px;background:linear-gradient(90deg,rgba(255,255,255,.04) 25%,rgba(255,255,255,.09) 50%,rgba(255,255,255,.04) 75%);background-size:200% 100%;animation:shimmer 1.4s linear infinite}
+.qlist{display:grid;gap:14px}
+.qcard{padding:18px 20px;display:grid;gap:12px}
+.qcard.open{border-color:rgba(245,184,46,.45)}
+.qtop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.qtop b{display:block}.qtop .s{color:var(--muted);font-size:13.5px}.qtop a{color:inherit}
+.qprod{font-size:12.5px;font-weight:700;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid var(--line)}
+.qq{margin:0;font-size:15.5px;line-height:1.5;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.04);border-left:3px solid var(--honey)}
+.qacts{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.qacts .qpub{margin:0 0 0 auto;padding:8px 12px}
+.qmeta{margin:0;font-size:13px}
 .me{margin-top:auto;padding-top:14px;border-top:1px solid var(--line);display:grid;gap:10px}
 .mewho b{display:block;font-size:14.5px}.mewho small{color:var(--muted);font-size:12.5px}
 .meacts{display:flex;flex-wrap:wrap;gap:6px}.meacts button{background:none;border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:5px 11px;font-size:12.5px;cursor:pointer}
@@ -237,7 +249,7 @@ legend{font-family:var(--f-display);font-weight:700;font-size:17px;color:var(--h
 .toast.show{opacity:1;transform:translate(-50%,0)}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 
-.brand svg{width:78px;height:49px}
+.brand img{height:54px;width:auto}
 .localnote{font-size:12.5px;color:var(--muted);line-height:1.45;padding:0 6px}
 .localnote a{color:var(--honey)}
 @media (max-width:900px){.localnote{display:none}}
@@ -246,28 +258,11 @@ legend{font-family:var(--f-display);font-weight:700;font-size:17px;color:var(--h
 </head><body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
 <linearGradient id="kgGold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFD54F"/><stop offset="1" stop-color="#F28C1B"/></linearGradient>
-<symbol id="kg-logo" viewBox="0 0 240 150">
-  <polygon points="30,76 62,20 178,20 210,76 178,132 62,132" fill="#1B5329"/>
-  <polygon points="34,76 64,24 176,24 206,76 176,128 64,128" fill="#2E7D3F" stroke="#FFFFFF" stroke-width="4" stroke-linejoin="round"/>
-  <polygon points="43,76 69,33 171,33 197,76 171,119 69,119" fill="none" stroke="#FFFFFF" stroke-opacity=".35" stroke-width="1.2"/>
-  <text x="120" y="63" text-anchor="middle" font-family="'Bricolage Grotesque',system-ui,sans-serif" font-weight="700" font-size="25" fill="#FFFFFF" letter-spacing="-.2">Kafulluk</text>
-  <text x="120" y="98" text-anchor="middle" font-family="'Bricolage Grotesque',system-ui,sans-serif" font-weight="800" font-size="34" fill="url(#kgGold)" stroke="#8A4A00" stroke-width=".5" letter-spacing="1">GURME</text>
-  <text x="120" y="113" text-anchor="middle" font-family="'Figtree',system-ui,sans-serif" font-weight="600" font-size="7.4" fill="#FFFFFF" letter-spacing=".6">Taze · Doğal · Lezzetli</text>
-  <g transform="translate(209,42) rotate(22) scale(.92)">
-    <path d="M0 26Q-1.5 2 0 -24" fill="none" stroke="#F28C1B" stroke-width="2.4" stroke-linecap="round"/>
-    <ellipse cx="0" cy="-28" rx="2.6" ry="5.8" fill="url(#kgGold)"/>
-    <g fill="url(#kgGold)">
-      <ellipse cx="-5" cy="-19" rx="2.6" ry="5.6" transform="rotate(-32 -5 -19)"/><ellipse cx="5" cy="-19" rx="2.6" ry="5.6" transform="rotate(32 5 -19)"/>
-      <ellipse cx="-5" cy="-9" rx="2.6" ry="5.6" transform="rotate(-32 -5 -9)"/><ellipse cx="5" cy="-9" rx="2.6" ry="5.6" transform="rotate(32 5 -9)"/>
-      <ellipse cx="-5" cy="1" rx="2.6" ry="5.6" transform="rotate(-32 -5 1)"/><ellipse cx="5" cy="1" rx="2.6" ry="5.6" transform="rotate(32 5 1)"/>
-      <ellipse cx="-4.5" cy="11" rx="2.4" ry="5" transform="rotate(-32 -4.5 11)"/><ellipse cx="4.5" cy="11" rx="2.4" ry="5" transform="rotate(32 4.5 11)"/>
-    </g>
-  </g>
-</symbol></defs></svg>
+</defs></svg>
 <div class="app" id="app">
   <aside class="side">
     <div class="brand">
-      <svg viewBox="0 0 240 150" role="img" aria-label="Kafulluk Gurme"><use href="#kg-logo"/></svg>
+      <img src="/logo.svg" alt="Kafulluk Gurme" width="1124" height="873" decoding="async">
       <div><b>Satıcı paneli</b><small>Kafulluk Gurme</small></div>
     </div>
     <nav class="nav" id="nav" aria-label="Panel bölümleri"></nav>
@@ -340,7 +335,7 @@ function parseSummary(t,products){
 var CATS=["Bal & Pekmez","Reçel & Marmelat","Peynir & Kaymak","Zeytin & Zeytinyağı","Şarküteri","Ezme & Helva","Çay & Kahve","Granola & Kuru Meyve","Kahvaltı Setleri"];
 var TYPES=[["jar","Kavanoz"],["bottle","Şişe"],["cheese","Peynir"],["olives","Zeytin"],["sausage","Şarküteri"],["pack","Paket"],["tub","Kutu / teneke"],["box","Set kutusu"]];
 var DEF={name:"Kafulluk Gurme",phone:"",email:"",address:"",hours:"",whatsapp:"",iban:"",freeAt:750,ship:59.9,fast:99.9,cod:19.9,lowStock:5};
-var VIEWS=[["panel","Özet"],["siparisler","Siparişler"],["urunler","Ürünler"],["kuponlar","Kuponlar"],["ayarlar","Ayarlar"],["kullanicilar","Kullanıcılar"]];
+var VIEWS=[["panel","Özet"],["siparisler","Siparişler"],["sorular","Sorular"],["urunler","Ürünler"],["kuponlar","Kuponlar"],["ayarlar","Ayarlar"],["kullanicilar","Kullanıcılar"]];
 /* rol: "yonetici" her şeyi görür; "personel" sipariş ve stok işleri yapar */
 var OWNER_ONLY={kuponlar:1,ayarlar:1,kullanicilar:1};
 var ROLE_L={yonetici:"Yönetici",personel:"Personel"};
@@ -351,11 +346,12 @@ var ICONS={
   panel:'<path d="M4 13h6V4H4zM14 20h6V4h-6zM4 20h6v-3H4z"/>',
   siparisler:'<path d="M5 4h14v16l-3-2-2 2-2-2-2 2-2-2-3 2z"/><path d="M9 9h6M9 13h6"/>',
   urunler:'<path d="M4 8l8-4 8 4v8l-8 4-8-4zM4 8l8 4 8-4M12 12v8"/>',
+  sorular:'<path d="M4 5h16v11H9l-5 4z"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.4"/><circle cx="12" cy="14.6" r=".4" fill="currentColor"/>',
   kullanicilar:'<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.4"/><path d="M15.5 14.2c3 .2 5.5 2.6 5.5 5.8"/>',
   kuponlar:'<path d="M4 9a2 2 0 0 0 0 6v3h16v-3a2 2 0 0 1 0-6V6H4z"/><path d="M10 9l4 6"/>',
   ayarlar:'<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/>'
 };
-var S={me:null,users:null,p:{},o:{},c:{},set:Object.assign({},DEF),ready:{p:false,o:false,c:false,s:false},view:"panel",oq:"",ost:"all",pq:"",pcat:"all",pf:"all",sel:null,gate:null,store:null};
+var S={me:null,users:null,q:{},qf:"bekleyen",qdraft:{},p:{},o:{},c:{},set:Object.assign({},DEF),ready:{p:false,o:false,c:false,s:false},view:"panel",oq:"",ost:"all",pq:"",pcat:"all",pf:"all",sel:null,gate:null,store:null};
 var db=null,M=null,busy={};
 var $=function(s,r){return (r||document).querySelector(s);};
 
@@ -386,9 +382,9 @@ function renderMe(){
    '<div class="meacts"><button type="button" data-act="myPassword">Şifremi değiştir</button><button type="button" data-act="logout">Çıkış yap</button></div>';
 }
 function renderNav(){
-  var pend=olist().filter(function(o){return o.status==="yeni";}).length,low=lowList().length;
+  var pend=olist().filter(function(o){return o.status==="yeni";}).length,low=lowList().length,qopen=qlist().filter(function(q){return !q.answer;}).length;
   $("#nav").innerHTML=views().map(function(v){
-    var n=v[0]==="siparisler"&&pend?'<span class="n">'+pend+'</span>':(v[0]==="urunler"&&low?'<span class="n warn" title="Düşük stok">'+low+'</span>':"");
+    var n=v[0]==="sorular"&&qopen?'<span class="n">'+qopen+'</span>':v[0]==="siparisler"&&pend?'<span class="n">'+pend+'</span>':(v[0]==="urunler"&&low?'<span class="n warn" title="Düşük stok">'+low+'</span>':"");
     return '<button class="nb" type="button" data-act="nav" data-v="'+v[0]+'"'+(S.view===v[0]?' aria-current="page"':"")+'>'+ico(v[0])+v[1]+n+'</button>';
   }).join("");
 }
@@ -401,9 +397,9 @@ function render(){
   if(!ready()){return;}
   if(!can(S.view)){S.view="panel";syncHash();}
   renderMe();
-  var h=S.view==="kullanicilar"?viewUsers():S.view==="siparisler"?viewOrders():S.view==="urunler"?viewProducts():S.view==="kuponlar"?viewCoupons():S.view==="ayarlar"?viewSettings():viewPanel();
+  var h=S.view==="sorular"?viewQuestions():S.view==="kullanicilar"?viewUsers():S.view==="siparisler"?viewOrders():S.view==="urunler"?viewProducts():S.view==="kuponlar"?viewCoupons():S.view==="ayarlar"?viewSettings():viewPanel();
   main.innerHTML='<div class="view">'+h+'</div>';
-  if(aid){var e=$("#"+aid);if(e&&e.focus&&e.tagName==="INPUT"){e.focus();try{e.setSelectionRange(ss,ss);}catch(x){}}}
+  if(aid){var e=$("#"+aid);if(e&&e.focus&&(e.tagName==="INPUT"||e.tagName==="TEXTAREA")){e.focus();try{e.setSelectionRange(ss,ss);}catch(x){}}}
   if(S.sel)renderDrawer();
 }
 function renderList(){
@@ -565,6 +561,52 @@ async function saveProduct(){
   if(!M.id)doc.sort=Date.now();
   var id=M.id||(name.toLowerCase().replace(/ğ/g,"g").replace(/ü/g,"u").replace(/ş/g,"s").replace(/ı/g,"i").replace(/ö/g,"o").replace(/ç/g,"c").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,40)||"urun")+"-"+Math.random().toString(36).slice(2,6);
   if(await w(function(){return db.doc("products/"+id).set(doc);},M.id?"Ürün güncellendi":"Ürün eklendi"))closeModal();
+}
+
+/* ===== müşteri soruları ===== */
+function qlist(){return Object.keys(S.q).map(function(k){return S.q[k];}).sort(function(a,b){return (!!a.answer-!!b.answer)||b.createdAt-a.createdAt;});}
+function qContact(c){var d=String(c||"").replace(/\D/g,"");
+  if(/@/.test(c))return {type:"mail",href:"mailto:"+c};
+  if(d.length>=10){var wa=d.length===10?"90"+d:d.length===11&&d[0]==="0"?"9"+d:d;return {type:"tel",href:"tel:+"+wa,wa:wa};}
+  return {type:"?"};}
+function viewQuestions(){
+  var qs=qlist(),open=qs.filter(function(q){return !q.answer;}).length;
+  var f=[["bekleyen","Yanıt bekleyen",open],["yanitlanan","Yanıtlanan",qs.length-open],["all","Tümü",qs.length]];
+  var r=qs.filter(function(q){return S.qf==="all"||(S.qf==="bekleyen"?!q.answer:!!q.answer);});
+  return '<div class="phead"><div><h1>Müşteri soruları</h1><p>Vitrinden gelen soruları yanıtlayın. Ürünle ilgili yanıtları ürün sayfasında yayınlayabilir, e-posta ya da WhatsApp ile müşteriye gönderebilirsiniz.</p></div></div>'+
+   '<div class="chips" style="margin-bottom:14px">'+f.map(function(x){return '<button class="chip" type="button" data-act="qf" data-k="'+x[0]+'" aria-pressed="'+(S.qf===x[0])+'">'+x[1]+'<small>'+x[2]+'</small></button>';}).join("")+'</div>'+
+   (r.length?'<div class="qlist">'+r.map(qCard).join("")+'</div>':'<div class="box"><div class="empty"><b>'+(S.qf==="bekleyen"?"Yanıt bekleyen soru yok":"Soru yok")+'</b>Müşteriler vitrinde "Soru sor" ile ya da ürün sayfasından soru gönderebilir.</div></div>');
+}
+function qCard(q){
+  var c=qContact(q.contact),draft=S.qdraft[q.id]!=null?S.qdraft[q.id]:q.answer;
+  return '<div class="box qcard'+(q.answer?'':' open')+'"><div class="qtop"><div><b>'+esc(q.name)+'</b><span class="s">'+
+    (c.href?'<a href="'+esc(c.href)+'">'+esc(q.contact)+'</a>':esc(q.contact))+' · '+dFmt(q.createdAt)+'</span></div>'+
+    '<span class="qprod">'+(q.pid?esc(q.productName||q.pid):'Genel soru')+'</span></div>'+
+    '<p class="qq">'+esc(q.question)+'</p>'+
+    '<div class="fld"><label for="qa-'+q.id+'">Yanıtınız</label><textarea id="qa-'+q.id+'" data-qa="'+q.id+'" placeholder="Yanıtınızı yazın…">'+esc(draft)+'</textarea></div>'+
+    '<div class="qacts"><button class="btn sm" type="button" data-act="qSave" data-id="'+q.id+'">'+(q.answer?'Yanıtı güncelle':'Yanıtı kaydet')+'</button>'+
+     (c.type==="mail"?'<button class="btn ghost sm" type="button" data-act="qSend" data-k="mail" data-id="'+q.id+'">E-posta ile gönder</button>':'')+
+     (c.type==="tel"?'<button class="btn ghost sm" type="button" data-act="qSend" data-k="wa" data-id="'+q.id+'">WhatsApp ile gönder</button>':'')+
+     (q.pid?'<label class="opt qpub"><input type="checkbox" data-chg="qpub" data-id="'+q.id+'"'+(q.public?' checked':'')+(q.answer?'':' disabled')+'><span>Ürün sayfasında yayınla</span></label>':'')+
+     (isOwner()?'<button class="iconbtn" type="button" data-act="qDel" data-id="'+q.id+'" data-arm="!" aria-label="Soruyu sil" title="Sil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h14M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></button>':'')+
+    '</div>'+(q.answer?'<p class="muted qmeta">Yanıtlayan: '+esc(q.answeredBy||"-")+(q.answeredAt?' · '+dFmt(q.answeredAt):'')+(q.public?' · <b style="color:var(--leaf)">Ürün sayfasında yayında</b>':'')+'</p>':'')+'</div>';
+}
+async function qSave(id){
+  var t=$("#qa-"+id),ans=t?t.value.trim():"";
+  if(!ans){toast("Önce yanıtınızı yazın",true);if(t)t.focus();return false;}
+  var ok=await w(function(){return db.doc("questions/"+id).update({answer:ans});},"Yanıt kaydedildi");
+  if(ok)delete S.qdraft[id];
+  return ok;
+}
+async function qSend(id,kind){
+  var q=S.q[id],t=$("#qa-"+id),ans=t?t.value.trim():"";if(!q)return;
+  if(!ans){toast("Önce yanıtınızı yazın",true);if(t)t.focus();return;}
+  var store=setting("name"),c=qContact(q.contact);
+  var body="Merhaba "+q.name.split(" ")[0]+",\n\n"+(q.productName?q.productName+" hakkındaki sorunuz":"Sorunuz")+":\n“"+q.question+"”\n\n"+ans+"\n\nSevgilerle,\n"+store;
+  // önce pencereyi aç (tarayıcı engellemesin), sonra yanıtı kaydet
+  if(kind==="wa")window.open("https://wa.me/"+c.wa+"?text="+encodeURIComponent(body),"_blank","noopener");
+  else location.href="mailto:"+q.contact+"?subject="+encodeURIComponent(store+" — sorunuzun yanıtı")+"&body="+encodeURIComponent(body);
+  if(ans!==q.answer)await qSave(id);
 }
 
 /* ===== kullanıcılar (yalnız yönetici) ===== */
@@ -760,12 +802,17 @@ document.addEventListener("click",async function(e){
   else if(a==="logout"){try{await fetch("/api/admin/logout",{method:"POST"});}catch(x){}location.reload();}
   else if(a==="retryBoot")boot();
   else if(a==="myPassword")openPwModal("mine");
+  else if(a==="qf"){S.qf=el.dataset.k;render();}
+  else if(a==="qSave")qSave(+id);
+  else if(a==="qSend")qSend(+id,el.dataset.k);
+  else if(a==="qDel")arm(el,function(){w(function(){return db.doc("questions/"+id).delete();},"Soru silindi");});
   else if(a==="uReset")openPwModal("reset",+id);
   else if(a==="uDel")arm(el,function(){w(function(){return db.userDelete(+id);},"Kullanıcı silindi").then(function(ok){if(ok)loadUsers();});});
 });
 document.addEventListener("change",function(e){
   var el=e.target,k=el.dataset&&el.dataset.chg;
   if(k==="active"){var id=el.dataset.id;w(function(){return db.doc("products/"+id).update({active:el.checked});});}
+  else if(k==="qpub"){var qid=el.dataset.id;w(function(){return db.doc("questions/"+qid).update({public:el.checked});},el.checked?"Yanıt ürün sayfasında yayında":"Yayından kaldırıldı");}
   else if(k==="uactive"){var uid=+el.dataset.id;w(function(){return db.userPatch(uid,{active:el.checked});},el.checked?"Kullanıcı aktif":"Kullanıcı pasife alındı, oturumu kapatıldı").then(function(){loadUsers();});}
   else if(k==="urole"){var uid2=+el.dataset.id;w(function(){return db.userPatch(uid2,{role:el.value});},"Rol güncellendi").then(function(){loadUsers();});}
   else if(k==="cactive"){var cid=el.dataset.id;w(function(){return db.doc("coupons/"+cid).update({active:el.checked});});}
@@ -775,6 +822,7 @@ document.addEventListener("change",function(e){
 });
 document.addEventListener("input",function(e){
   var el=e.target,k=el.dataset&&el.dataset.in;
+  if(el.dataset&&el.dataset.qa){S.qdraft[el.dataset.qa]=el.value;return;}
   if(k==="oq"){S.oq=el.value;renderList();}
   else if(k==="pq"){S.pq=el.value;renderList();}
   else if(el.id==="of-disc"&&M){M.disc=num(el.value);refreshTotals();}
@@ -812,7 +860,7 @@ window.addEventListener("hashchange",function(){var h=location.hash.replace("#",
 /* ===== sunucu veri katmanı (/api/admin) =====
    Panelin geri kalanı doc()/collection() arayüzünü kullanır; burada REST çağrılarına çevrilir. */
 function makeApiDb(){
-  var data={products:{},orders:{},coupons:{},settings:{}},subs=[],pending=false,lastNew=null,timer=null;
+  var data={products:{},orders:{},coupons:{},settings:{},questions:{}},subs=[],pending=false,lastNew=null,lastQ=null,timer=null;
   async function call(method,path,body){
     var r;
     try{r=await fetch(path,{method:method,credentials:"same-origin",headers:body!==undefined?{"content-type":"application/json"}:{},body:body!==undefined?JSON.stringify(body):undefined});}
@@ -825,17 +873,20 @@ function makeApiDb(){
   function idx(arr,k){var o={};(arr||[]).forEach(function(x){o[x[k]]=x;});return o;}
   async function refresh(){
     var d=await call("GET","/api/admin/data");
-    data.products=idx(d.products,"id");data.orders=idx(d.orders,"id");data.coupons=idx(d.coupons,"code");data.settings={store:d.settings||{}};
+    data.products=idx(d.products,"id");data.orders=idx(d.orders,"id");data.coupons=idx(d.coupons,"code");data.settings={store:d.settings||{}};data.questions=idx(d.questions,"id");
+    var qopen=(d.questions||[]).filter(function(q){return !q.answer;});
+    if(lastQ){var nq=qopen.filter(function(q){return !lastQ[q.id];});if(nq.length)toast(nq.length===1?"Yeni soru: "+nq[0].name+(nq[0].productName?" · "+nq[0].productName:""):nq.length+" yeni soru geldi");}
+    lastQ={};qopen.forEach(function(q){lastQ[q.id]=1;});
     var fresh=d.orders.filter(function(o){return o.status==="yeni";});
     if(lastNew){var nw=fresh.filter(function(o){return !lastNew[o.id]&&o.source==="web";});if(nw.length)toast(nw.length===1?"Yeni sipariş geldi: "+nw[0].no:nw.length+" yeni sipariş geldi");}
     lastNew={};fresh.forEach(function(o){lastNew[o.id]=1;});
-    document.title=(fresh.length?"("+fresh.length+") ":"")+"Kafulluk Satıcı Paneli";
+    var badge=fresh.length+qopen.length;document.title=(badge?"("+badge+") ":"")+"Kafulluk Satıcı Paneli";
     notify();return d;
   }
   function notify(){if(pending)return;pending=true;Promise.resolve().then(function(){pending=false;subs.slice().forEach(function(s){s();});});}
   function split(path){var i=path.indexOf("/");return [path.slice(0,i),path.slice(i+1)];}
   function snap(col,id){var v=data[col]&&data[col][id];return {id:id,exists:!!v,data:function(){return v?JSON.parse(JSON.stringify(v)):undefined;}};}
-  var U={products:"/api/admin/products/",coupons:"/api/admin/coupons/",orders:"/api/admin/orders/"};
+  var U={products:"/api/admin/products/",coupons:"/api/admin/coupons/",orders:"/api/admin/orders/",questions:"/api/admin/questions/"};
   function strip(d){var o=Object.assign({},d);delete o.id;return o;}
   async function after(p){var r=await p;await refresh();return r;}
   return {
@@ -906,7 +957,7 @@ function loadSamples(){
   renderNav();
   db=makeApiDb();
   function coll(name,key,flag){db.collection(name).onSnapshot(function(snap){var o={};snap.docs.forEach(function(d){if(d.exists)o[d.id]=Object.assign({id:d.id},d.data());});S[key]=o;S.ready[flag]=true;render();});}
-  coll("products","p","p");coll("orders","o","o");coll("coupons","c","c");
+  coll("products","p","p");coll("orders","o","o");coll("coupons","c","c");coll("questions","q","q");
   db.doc("settings/store").onSnapshot(function(s){S.set=Object.assign({},DEF,s.exists?s.data():{});S.ready.s=true;render();});
   boot();
 })();

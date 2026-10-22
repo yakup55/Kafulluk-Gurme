@@ -32,6 +32,9 @@ const FIELD: Record<string, string> = {
   qty: "Adet",
   role: "Rol",
   code: "Kupon kodu",
+  contact: "E-posta / telefon",
+  question: "Soru",
+  answer: "Yanıt",
 };
 function zodMessage(i: ZodIssueLike | undefined) {
   if (!i) return "Geçersiz veri.";
