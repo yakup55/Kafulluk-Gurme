@@ -16,7 +16,20 @@ let _ready: Promise<void> | undefined;
 function client(): Sql {
   if (_sql) return _sql;
   const url = process.env["DATABASE_URL"];
-  if (!url) throw new HttpError(503, "Veritabanı yapılandırılmamış (DATABASE_URL).");
+  if (!url) {
+    throw new HttpError(
+      503,
+      "Veritabanı yapılandırılmamış: DATABASE_URL bulunamadı. Proje klasöründe .env dosyası olduğundan " +
+        "(adı tam olarak .env, .env.txt değil) ve sunucuyu yeniden başlattığınızdan emin olun.",
+    );
+  }
+  if (!/^postgres(ql)?:\/\//.test(url)) {
+    throw new HttpError(
+      503,
+      "DATABASE_URL biçimi hatalı. postgres://kullanici:sifre@sunucu:5432/veritabani şeklinde olmalı" +
+        (url.startsWith("jdbc:") ? " (JDBC formatı Node'da çalışmaz)." : "."),
+    );
+  }
   _sql = postgres(url, {
     max: Number(process.env["DATABASE_POOL_MAX"] ?? 5),
     idle_timeout: 20,

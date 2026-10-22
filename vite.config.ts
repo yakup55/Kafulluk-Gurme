@@ -4,7 +4,13 @@
 //     nitro (build-only using cloudflare as a default target), VITE_* env injection, @ path alias,
 //     React/TanStack dedupe, error logger plugins, and sandbox detection (port/host/strictPort).
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
+import { existsSync } from "node:fs";
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
+
+// Sunucu değişkenlerini (DATABASE_URL, ADMIN_PASSWORD, SESSION_SECRET…) .env'den yükle.
+// Vite kendiliğinden yalnızca VITE_* değişkenlerini yükler. Sistemde zaten tanımlı olan
+// değişkenler (ör. Lovable Secrets, sunucu servis ayarı) ezilmez.
+if (existsSync(".env")) process.loadEnvFile(".env");
 
 export default defineConfig({
   tanstackStart: {

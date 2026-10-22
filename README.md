@@ -34,7 +34,11 @@ Gurme kahvaltılık ürünler satan e-ticaret sitesi: vitrin (`/`), satıcı pan
 0. **Node.js 22.12 veya üzeri** gerekli (`node -v`). Node 20 ile `vite dev` "Cannot find native binding" hatası verir.
 1. `.env.example` dosyasını `.env` olarak kopyalayın ve `DATABASE_URL`, `ADMIN_PASSWORD`, `SESSION_SECRET` değerlerini girin.
 2. `bun install` (ya da `npm i`)
-3. `bun run dev` → vitrin: http://localhost:3000 · panel: http://localhost:3000/satici.html
+3. `npm run dev` (ya da `bun run dev`) → vitrin: http://localhost:3000 · panel: http://localhost:3000/satici.html
+
+**`.env` notları:** Dosyanın adı tam olarak `.env` olmalı (Windows'ta `.env.txt` olarak kaydedilmesin; `Get-ChildItem -Force .env*` ile kontrol edin) ve proje kök klasöründe durmalı. `DATABASE_URL` Node biçiminde yazılır: `postgres://kullanici:sifre@localhost:5432/kafulluk` — Java'daki `jdbc:postgresql://…` biçimi çalışmaz. `.env` değişince `npm run dev`'i yeniden başlatın.
+
+**Canlı (Node sunucusu):** `NITRO_PRESET=node-server npm run build` ardından `npm start` (`.env`'i okur, `PORT` ile port seçilir).
 
 Lovable üzerinde yayınlıyorsanız aynı değişkenleri projenin **Secrets** bölümüne ekleyin.
 
