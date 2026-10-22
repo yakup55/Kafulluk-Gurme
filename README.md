@@ -31,6 +31,7 @@ Gurme kahvaltılık ürünler satan e-ticaret sitesi: vitrin (`/`), satıcı pan
 
 ## Kurulum
 
+0. **Node.js 22.12 veya üzeri** gerekli (`node -v`). Node 20 ile `vite dev` "Cannot find native binding" hatası verir.
 1. `.env.example` dosyasını `.env` olarak kopyalayın ve `DATABASE_URL`, `ADMIN_PASSWORD`, `SESSION_SECRET` değerlerini girin.
 2. `bun install` (ya da `npm i`)
 3. `bun run dev` → vitrin: http://localhost:3000 · panel: http://localhost:3000/satici.html
