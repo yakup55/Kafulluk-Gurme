@@ -38,6 +38,19 @@ Gurme kahvaltılık ürünler satan e-ticaret sitesi: vitrin (`/`), satıcı pan
 
 Lovable üzerinde yayınlıyorsanız aynı değişkenleri projenin **Secrets** bölümüne ekleyin.
 
+## Demo veri
+
+Paneli ve vitrini müşteriye göstermek ya da denemek için:
+
+```bash
+npm run seed:demo                    # 150 örnek sipariş (son 60 gün)
+npm run seed:demo -- --orders=400    # daha fazla
+```
+
+Yüklenenler: son 60 günün siparişleri (farklı il/ilçe müşteriler, tüm durumlar, kargo takip no, kupon, ödeme tipleri), gerçekçi stoklar (birkaçı az/tükenmiş), stok hareketleri, kuponlar, mağaza ayarlarının boş alanları ve personel hesapları (`ayse.k`, `mehmet` / `personel123`).
+
+Siparişler **örnek** işaretlidir; canlıya geçmeden önce Panel → Özet → **Örnek siparişleri sil** ile stoklara dokunmadan silinir. Script tekrar çalıştırılırsa eski örnekleri silip yenilerini yükler; gerçek siparişlere dokunmaz. Canlıda personel şifrelerini değiştirin ve IBAN'ı güncelleyin.
+
 ## API özeti
 
 | Yöntem | Yol | Açıklama |
